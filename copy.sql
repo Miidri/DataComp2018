@@ -1,0 +1,1 @@
+COPY original.profiledata FROM '/home/takut0/data/data2/ProfileData_2.csv' CSV HEADER; 
