@@ -21,7 +21,7 @@ DISTRIBUTED BY(web_index, ind_num, web_date, web_start_time, url);
 COPY 
   original.t_weblog
 FROM 
-  '/home/takut0/data/t_weblog_0000_part_00.tsv'; 
+  '/home/takut0/data/t_weblog_0000_part_00.tsv' DELIMITER '\t'; 
 -- データを挿入する2
 COPY 
   original.t_weblog
