@@ -14,4 +14,4 @@ DISTRIBUTED BY(qu_genre_code,question_code, answer_code);
 COPY 
   original.profilemaster
 FROM 
-  '/home/takut0/data/ProfileMaster.csv' CSV HEADER; 
+  '/home/takut0/data/ProfileMaster.csv' WITH CSV; 
