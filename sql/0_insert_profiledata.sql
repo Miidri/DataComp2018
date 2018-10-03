@@ -1,13 +1,13 @@
 DROP TABLE IF EXISTS original.profiledata;
 CREATE TABLE original.profiledata(
   house_num char(10),
-  tmp char(10), -- 不要列, 前処理において削除する
+  ind_num char(10), 
   qu_genre_code CHAR(10),
   question_code CHAR(10),
   answer_code CHAR(10)
 )
 -- 主キーを設定する
-DISTRIBUTED BY(house_num,qu_genre_code,question_code,answer_code);
+DISTRIBUTED BY(house_num,ind_num,qu_genre_code,question_code,answer_code);
 -- データを挿入する
 COPY 
   original.profiledata 
