@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS original.profiledata;
 CREATE TABLE original.profiledata(
-  house_num char(10),
-  ind_num char(10), 
+  house_num CHAR(10),
+  ind_num CHAR(10), 
   qu_genre_code CHAR(10),
   question_code CHAR(10),
   answer_code CHAR(10)
