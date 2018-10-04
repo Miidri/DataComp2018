@@ -19,11 +19,16 @@ SELECT
   SUM(CASE WHEN ind_num IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN qu_genre_code IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN question_code IS NULL THEN 1 ELSE 0 END),
-  SUM(CASE WHEN answer_code IS NULL THEN 1 ELSE 0 END)
-  
+  SUM(CASE WHEN answer_code IS NULL THEN 1 ELSE 0 END),
+  SUM(CASE WHEN house_num='' THEN 1 ELSE 0 END),
+  SUM(CASE WHEN ind_num='' THEN 1 ELSE 0 END),
+  SUM(CASE WHEN qu_genre_code='' THEN 1 ELSE 0 END),
+  SUM(CASE WHEN question_code='' THEN 1 ELSE 0 END),
+  SUM(CASE WHEN answer_code='' THEN 1 ELSE 0 END)  
 FROM(
   -- 文字列を長さに変換する仮テーブル -- 
   SELECT
+    *,
     CHAR_LENGTH(house_num) AS house_num_len,
     CHAR_LENGTH(ind_num) AS ind_num_len,
     CHAR_LENGTH(qu_genre_code) AS qu_genre_code_len,
