@@ -1,3 +1,6 @@
+-- preprocessing by vim -- 
+-- :%s/\\/|/g --
+
 DROP TABLE IF EXISTS original.t_weblog;
 CREATE TABLE original.t_weblog(
   web_index CHAR(100),
@@ -7,33 +10,34 @@ CREATE TABLE original.t_weblog(
   pc_flag CHAR(100),
   unknown1 CHAR(100),
   unknown2 CHAR(100),
-  url CHAR(100),
-  domain CHAR(100),
+  url TEXT,
+  domain TEXT,
   sub_domain CHAR(100),
-  referrer CHAR(100),
+  referrer TEXT,
+  referrer_url TEXT,
   referrer_domain CHAR(100),
-  web_title CHAR(100),
+  web_title TEXT,
   web_time CHAR(100)
 )
 -- 主キーを設定する
-DISTRIBUTED BY(web_index, ind_num, web_date, web_start_time, url);
+DISTRIBUTED BY(web_index);
 -- データを挿入する1
-COPY 
+COPY
   original.t_weblog
 FROM 
-  '/home/takut0/data/t_weblog_0000_part_00.tsv' DELIMITER '\t'; 
+  '/home/takut0/data/修正データ2/t_weblog_0000_part_00.tsv' DELIMITER U&'\0009'; 
 -- データを挿入する2
 COPY 
   original.t_weblog
 FROM 
-  '/home/takut0/data/t_weblog_0001_part_00.tsv'; 
+  '/home/takut0/data/修正データ2/t_weblog_0001_part_00.tsv' DELIMITER U&'\0009'; 
 -- データを挿入する3
 COPY 
   original.t_weblog
 FROM 
-  '/home/takut0/data/t_weblog_0002_part_00.tsv'; 
+  '/home/takut0/data/修正データ2/t_weblog_0002_part_00.tsv' DELIMITER U&'\0009'; 
 -- データを挿入する4
 COPY 
   original.t_weblog
 FROM 
-  '/home/takut0/data/t_weblog_0003_part_00.tsv'; 
+  '/home/takut0/data/修正データ2/t_weblog_0003_part_00.tsv' DELIMITER U&'\0009'; 
