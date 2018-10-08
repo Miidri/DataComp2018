@@ -3,6 +3,8 @@ data competition 2018
 
 ## SQL
 
+For the working process
+
 - 0 : insert data
 - 1 : basic analysis for original data
 - 1_1 : check primary key
