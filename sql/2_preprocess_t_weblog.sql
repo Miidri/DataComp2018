@@ -1,33 +1,46 @@
 DROP TABLE IF EXISTS processed.t_weblog;
 CREATE TABLE processed.t_weblog
 (
-  web_index CHAR(100),
-  ind_num CHAR(100),
-  web_date CHAR(100),
-  web_start_time CHAR(100),
-  pc_flag CHAR(100),
-  unknown1 CHAR(100),
-  unknown2 CHAR(100),
-  url TEXT,
-  domain TEXT,
-  sub_domain CHAR(100),
-  referrer TEXT,
-  referrer_url TEXT,
-  referrer_domain CHAR(100),
-  web_title TEXT,
-  web_time CHAR(100),
-  PRIMARY KEY ( )
+  web_index INT,
+  web_date DATE,
+  web_start_time TIMESTAMP,
+  pc_flag INT,
+  unknown1 INT,
+  unknown2 INT,
+  url CHAR(512),
+  domain CHAR(71),
+  sub_domain CHAR(80),
+  referrer CHAR(128),
+  referrer_url CHAR(512),
+  referrer_domain CHAR(67),
+  web_title CHAR(256),
+  web_time INT,
+  PRIMARY KEY (web_index, web_date, web_start_time, pc_flag, unknown1, unknown2, url, 
+               domain, sub_domain, referrer, referrer_url, referrer_domain, web_title, web_time)
 )
-DISTRIBUTED BY ( );
+DISTRIBUTED BY (web_index, web_date, web_start_time, pc_flag, unknown1, unknown2, url, 
+                domain, sub_domain, referrer, referrer_url, referrer_domain, web_title, web_time);
 INSERT INTO processed.t_weblog
 SELECT
-  TO_NUMBER(qu_genre_code,'99'),
-  qu_genre,
-  TO_NUMBER(question_code,'999'),
-  question,
-  question_type,
-  TO_NUMBER(answer_code,'999'),
-  answer
+  TO_NUMBER(web_index,'99999'),
+  TO_DATE(web_date,'YYYY-MM-DD'),
+  -- 要修正 -- 
+  CASE WHEN to_number(web_start_time,'999999') >= 2500 THEN to_timestamp(br_date||'0'||TRIM(to_char(to_number(start_time,'9999') - 2400,'999')),'YYYY-MM-DDHH24MI') + interval '1day'
+	     WHEN to_number(web_start_time,'999999') >= 2410 THEN to_timestamp(br_date||'00'||TRIM(to_char(to_number(start_time,'9999') - 2400,'99')),'YYYY-MM-DDHH24MI') + interval '1day'
+	     WHEN to_number(web_start_time,'999999') >= 2400 THEN to_timestamp(br_date||'000'|| TRIM(to_char(to_number(start_time,'9999') - 2400,'9')),'YYYY-MM-DDHH24MI') + interval '1day'
+		 ELSE to_timestamp(br_date||start_time,'YYYY-MM-DDHH24MI') END AS br_start_datetime,
+  ------------
+  TO_NUMBER(pc_flag,'9'),
+  TO_NUMBER(unknown1,'9'),
+  TO_NUMBER(unknown2,'9'),
+  url,
+  domain,
+  sub_domain,
+  referrer,
+  referrer_url,
+  referrer_domain,
+  web_title,
+  TO_NUMBER(web_time,'9999')
 FROM 
   original.t_weblog;
    
