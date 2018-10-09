@@ -1,12 +1,12 @@
 -- basic analysis for raw data -- 
 SELECT
   -- MAX --
-  MAX(house_num_len),
-  MAX(web_date_len),
-  MAX(web_start_time_len),
-  MAX(pc_flag_len),
-  MAX(sp_flag_len),
-  MAX(tb_flag_len),
+  MAX(house_num),
+  MAX(web_date),
+  MAX(web_start_datetime),
+  MAX(pc_flag),
+  MAX(sp_flag),
+  MAX(tb_flag),
   MAX(url_len),
   MAX(domain_len),
   MAX(sub_domain_len),
@@ -14,14 +14,14 @@ SELECT
   MAX(referrer_len),
   MAX(referrer_domain_len),
   MAX(web_title_len),
-  MAX(web_time_len),
+  MAX(web_time),
   -- MIN --
-  MIN(house_num_len),
-  MIN(web_date_len),
-  MIN(web_start_time_len),
-  MIN(pc_flag_len),
-  MIN(sp_flag_len),
-  MIN(tb_flag_len),
+  MIN(house_num),
+  MIN(web_date),
+  MIN(web_start_datetime),
+  MIN(pc_flag),
+  MIN(sp_flag),
+  MIN(tb_flag),
   MIN(url_len),
   MIN(domain_len),
   MIN(sub_domain_len),
@@ -29,11 +29,11 @@ SELECT
   MIN(referrer_len),
   MIN(referrer_domain_len),
   MIN(web_title_len),
-  MIN(web_time_len),
+  MIN(web_time),
   -- COUNT DISTINCT -- 
   COUNT(DISTINCT(house_num)),
   COUNT(DISTINCT(web_date)),
-  COUNT(DISTINCT(web_start_time)),
+  COUNT(DISTINCT(web_start_datetime)),
   COUNT(DISTINCT(pc_flag)),
   COUNT(DISTINCT(sp_flag)),
   COUNT(DISTINCT(tb_flag)),
@@ -48,7 +48,7 @@ SELECT
   -- CHECK NULL --
   SUM(CASE WHEN house_num IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_date IS NULL THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_start_time IS NULL THEN 1 ELSE 0 END),
+  SUM(CASE WHEN web_start_datetime IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN pc_flag IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN sp_flag IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN tb_flag IS NULL THEN 1 ELSE 0 END),
@@ -62,7 +62,7 @@ SELECT
   SUM(CASE WHEN web_time IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN house_num='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_date='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_start_time='' THEN 1 ELSE 0 END),
+  SUM(CASE WHEN web_start_datetime='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN pc_flag='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN sp_flag='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN tb_flag='' THEN 1 ELSE 0 END),
@@ -78,20 +78,13 @@ FROM(
   -- 文字列を長さに変換する仮テーブル --
   SELECT
     *,
-    CHAR_LENGTH(house_num) AS house_num_len,
-    CHAR_LENGTH(web_date) AS web_date_len,
-    CHAR_LENGTH(web_start_time) AS web_start_time_len,
-    CHAR_LENGTH(pc_flag) AS pc_flag_len,
-    CHAR_LENGTH(sp_flag) AS sp_flag_len,
-    CHAR_LENGTH(tb_flag) AS tb_flag_len,
     CHAR_LENGTH(url) AS url_len,
     CHAR_LENGTH(domain) AS domain_len,
     CHAR_LENGTH(sub_domain) AS sub_domain_len,
     CHAR_LENGTH(user_agent) AS user_agent_len,
     CHAR_LENGTH(referrer) AS referrer_len,
     CHAR_LENGTH(referrer_domain) AS referrer_domain_len,
-    CHAR_LENGTH(web_title) AS web_title_len,
-    CHAR_LENGTH(web_time) AS web_time_len
+    CHAR_LENGTH(web_title) AS web_title_len
   FROM
     processed.t_weblog
     ) AS length_table;
