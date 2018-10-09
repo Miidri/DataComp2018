@@ -2,7 +2,6 @@
 SELECT
   -- MAX --
   MAX(web_index_len),
-  MAX(ind_num_len),
   MAX(web_date_len),
   MAX(web_start_time_len),
   MAX(pc_flag_len),
@@ -18,7 +17,6 @@ SELECT
   MAX(web_time_len),
   -- MIN --
   MIN(web_index_len),
-  MIN(ind_num_len),
   MIN(web_date_len),
   MIN(web_start_time_len),
   MIN(pc_flag_len),
@@ -34,7 +32,6 @@ SELECT
   MIN(web_time_len),
   -- COUNT DISTINCT -- 
   COUNT(DISTINCT(web_index)),
-  COUNT(DISTINCT(ind_num)),
   COUNT(DISTINCT(web_date)),
   COUNT(DISTINCT(web_start_time)),
   COUNT(DISTINCT(pc_flag)),
@@ -50,7 +47,6 @@ SELECT
   COUNT(DISTINCT(web_time)),
   -- CHECK NULL --
   SUM(CASE WHEN web_index IS NULL THEN 1 ELSE 0 END),
-  SUM(CASE WHEN ind_num IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_date IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_start_time IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN pc_flag IS NULL THEN 1 ELSE 0 END),
@@ -65,7 +61,6 @@ SELECT
   SUM(CASE WHEN web_title IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_time IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_index='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN ind_num='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_date='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_start_time='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN pc_flag='' THEN 1 ELSE 0 END),
@@ -84,7 +79,6 @@ FROM(
   SELECT
     *,
     CHAR_LENGTH(web_index) AS web_index_len,
-    CHAR_LENGTH(ind_num) AS ind_num_len,
     CHAR_LENGTH(web_date) AS web_date_len,
     CHAR_LENGTH(web_start_time) AS web_start_time_len,
     CHAR_LENGTH(pc_flag) AS pc_flag_len,
