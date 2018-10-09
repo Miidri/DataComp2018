@@ -3,8 +3,18 @@ SELECT
   COUNT(*)
 FROM(
   SELECT
-    DISTINCT web_index, web_date, web_start_time, pc_flag, unknown1, unknown2, url, 
-             domain, sub_domain, referrer, referrer_url, referrer_domain, web_title, web_time
+    DISTINCT house_num, web_date, web_start_time, pc_flag, sp_flag, tb_flag, url, 
+             domain, sub_domain, user_agent, referrer, referrer_domain, web_title, web_time
+  FROM
+    original.t_weblog
+    ) AS test;
+    
+-- check primary key2-- 
+SELECT
+  COUNT(*)
+FROM(
+  SELECT
+    DISTINCT house_num, web_date, web_start_time, url, user_agent, referrer, web_title, web_time
   FROM
     original.t_weblog
     ) AS test;
