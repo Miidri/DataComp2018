@@ -1,28 +1,27 @@
 DROP TABLE IF EXISTS processed.t_weblog;
 CREATE TABLE processed.t_weblog
 (
-  web_index INT,
+  house_num INT,
   web_date DATE,
   web_start_datetime TIMESTAMP,
   pc_flag INT,
-  unknown1 INT,
-  unknown2 INT,
+  sp_flag INT,
+  tb_flag INT,
   url CHAR(512),
   domain CHAR(71),
   sub_domain CHAR(80),
-  referrer CHAR(128),
-  referrer_url CHAR(512),
+  user_agent CHAR(128),
+  referrer CHAR(512),
   referrer_domain CHAR(67),
   web_title CHAR(256),
   web_time INT,
-  PRIMARY KEY (web_index, web_date, web_start_datetime, pc_flag, unknown1, unknown2, url, 
-               domain, sub_domain, referrer, referrer_url, referrer_domain, web_title, web_time)
+  PRIMARY KEY ()
 )
-DISTRIBUTED BY (web_index, web_date, web_start_datetime, pc_flag, unknown1, unknown2, url, 
-                domain, sub_domain, referrer, referrer_url, referrer_domain, web_title, web_time);
+DISTRIBUTED BY ();
+
 INSERT INTO processed.t_weblog
 SELECT
-  TO_NUMBER(web_index,'99999'),
+  TO_NUMBER(house_num,'99999'),
   TO_DATE(web_date,'YYYY-MM-DD'),
   CASE 
    WHEN to_number(web_start_time,'999999') >= 250000
@@ -37,13 +36,13 @@ SELECT
     THEN to_timestamp(web_date||'00000'|| TRIM(to_char(to_number(web_start_time,'999999') - 240000,'9')),'YYYY-MM-DDHH24MISS') + INTERVAL '1day'
    ELSE to_timestamp(web_date||web_start_time,'YYYY-MM-DDHH24MISS') END AS web_start_datetime,
   TO_NUMBER(pc_flag,'9'),
-  TO_NUMBER(unknown1,'9'),
-  TO_NUMBER(unknown2,'9'),
+  TO_NUMBER(sp_flag,'9'),
+  TO_NUMBER(tb_flag,'9'),
   url,
   domain,
   sub_domain,
+  user_agent,
   referrer,
-  referrer_url,
   referrer_domain,
   web_title,
   TO_NUMBER(web_time,'9999')
