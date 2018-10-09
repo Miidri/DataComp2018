@@ -14,7 +14,7 @@ CREATE TABLE original.t_weblog(
   domain TEXT,
   sub_domain CHAR(100),
   user_agent TEXT,
-  referrer_url TEXT,
+  referrer TEXT,
   referrer_domain CHAR(100),
   web_title TEXT,
   web_time CHAR(100)

@@ -15,9 +15,9 @@ CREATE TABLE processed.t_weblog
   referrer_domain CHAR(67),
   web_title CHAR(256),
   web_time INT,
-  PRIMARY KEY ()
+  PRIMARY KEY (house_num, web_date, web_start_datetime, url, user_agent, referrer, web_title, web_time)
 )
-DISTRIBUTED BY ();
+DISTRIBUTED BY (house_num, web_date, web_start_datetime, url, user_agent, referrer, web_title, web_time);
 
 INSERT INTO processed.t_weblog
 SELECT
@@ -48,4 +48,3 @@ SELECT
   TO_NUMBER(web_time,'9999')
 FROM 
   original.t_weblog;
-  
