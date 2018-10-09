@@ -3,7 +3,7 @@
 
 DROP TABLE IF EXISTS original.t_weblog;
 CREATE TABLE original.t_weblog(
-  web_index CHAR(100),
+  house_num CHAR(100),
   ind_num CHAR(100),
   web_date CHAR(100),
   web_start_time CHAR(100),
