@@ -60,20 +60,13 @@ SELECT
   SUM(CASE WHEN referrer_domain IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_title IS NULL THEN 1 ELSE 0 END),
   SUM(CASE WHEN web_time IS NULL THEN 1 ELSE 0 END),
-  SUM(CASE WHEN house_num='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_date='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_start_datetime='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN pc_flag='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN sp_flag='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN tb_flag='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN url='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN domain='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN sub_domain='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN user_agent='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN referrer='' THEN 1 ELSE 0 END),
   SUM(CASE WHEN referrer_domain='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_title='' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN web_time='' THEN 1 ELSE 0 END)
+  SUM(CASE WHEN web_title='' THEN 1 ELSE 0 END)
 FROM(
   -- 文字列を長さに変換する仮テーブル --
   SELECT
