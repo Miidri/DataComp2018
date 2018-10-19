@@ -2,4 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# 機密情報が含まれる場合がある.
 Rmd/
+image/
+slide
