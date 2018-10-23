@@ -52,3 +52,23 @@ WHERE
     HAVING
       COUNT(*) = 1
   );
+
+-- house_num, web_start_datetime, web_time について同じ時刻に開いて, 同じ時間閲覧する182件
+SELECT
+  *
+FROM
+  processed.t_weblog  
+WHERE
+  (house_num, web_start_datetime, web_time)
+  IN(
+    SELECT
+      house_num, web_start_datetime, web_time
+    FROM
+      processed.t_weblog
+    WHERE
+      web_time > 0
+    GROUP BY
+      house_num, web_start_datetime, web_time 
+    HAVING
+      COUNT(*) > 1
+  );
