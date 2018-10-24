@@ -10,13 +10,27 @@ For the working process
 - 1_1 : check primary key
 - 2 : preprocess
 - 3 : basic analysis for prerprocess data
+- 4 : plus analysis for preprocess data
+
+## Rmd
+
+- 0 : EDA for each
+
+## script
+
+- sql_connect.R : SQL接続情報, no push
 
 ## Directory
 
 ```
 ├── DataComp2018.Rproj
 ├── README.md
-├── data
+├── Rmd
+│   ├── 0_EDA_check_house_number.Rmd
+│   ├── 0_EDA_t_weblog.Rmd
+│   └── 1_Analysis_t_weblog.Rmd
+├── script
+│   └── sql_connect.R
 └── sql
     ├── 0_insert_profiledata.sql
     ├── 0_insert_profilemaster.sql
