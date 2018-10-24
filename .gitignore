@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 
-# 機密情報が含まれる場合がある.
-Rmd/
+# 機密情報を含む
+script/sql_connect.R
 image/
-slide
+slide/
