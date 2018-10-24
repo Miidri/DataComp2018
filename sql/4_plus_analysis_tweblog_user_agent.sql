@@ -13,7 +13,7 @@ FROM
       -- windows --
       WHEN user_agent LIKE '%Windows NT 5.0%' THEN 'windows_2000'
       WHEN user_agent LIKE '%Windows NT 5.1%' THEN 'windows_xp'
-      WHEN user_agent LIKE '%Windows NT 5.2%' THEN 'windows_xp_64'
+      WHEN user_agent LIKE '%Windows NT 5.2%' THEN 'windows_xp.64'
       WHEN user_agent LIKE '%Windows NT 6.0%' THEN 'windows_vista'
       WHEN user_agent LIKE '%Windows NT 6.1%' THEN 'windows_7'
       WHEN user_agent LIKE '%Windows NT 6.2%' THEN 'windows_8'
