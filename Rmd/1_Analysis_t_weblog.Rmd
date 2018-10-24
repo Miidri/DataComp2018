@@ -1,0 +1,119 @@
+---
+title: "Analysis t_weblog"
+author: "kotsubo takuto"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## Library package
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(scales)
+library(DT)
+```
+
+## ggplot theme
+
+```{r}
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+# Report
+
+閲覧履歴データにはシステムによる自動的な更新, ユーザーによる意図的なアクセス推移が存在する. そのため同一時刻に同一のidが閲覧を始める現象, 加えて閲覧時間も同様な場合がある. それらの存在により, house_num, web_datetimeによる並び替えが一意に定まらないので, 重複を削除しているがよくない気がする. user_agentの情報も加えて, 同一の媒体であることも加えて調査してみる.
+
+- 総カラム数: 47498546件
+- Distinct(time,id): 46885392
+- 閲覧時間1秒以上: 46791232
+- 閲覧時間1秒以上かつDistinct(time,id): 46789430 
+
+```{r}
+# 同一時刻, 同一id
+dbGetQuery(
+  con2,"SELECT COUNT(*) FROM (SELECT DISTINCT web_start_datetime, house_num FROM processed.t_weblog) AS test;")
+# 閲覧時間1秒以上
+dbGetQuery(
+  con2,"SELECT COUNT(*) FROM processed.t_weblog WHERE web_time <> 0;")
+# 閲覧時刻i秒以上かつ同一時刻, 同一id
+dbGetQuery(
+  con2,"SELECT COUNT(*) 
+        FROM (
+          SELECT DISTINCT web_start_datetime, house_num 
+          FROM processed.t_weblog 
+          WHERE web_time <> 0) AS test;")
+```
+
+## preprocess
+
+```{r}
+dbGetQuery(
+  con2,"SELECT
+  *
+FROM
+  processed.t_weblog  
+WHERE
+  (house_num, web_start_datetime, web_time)
+  IN(
+    SELECT
+      house_num, web_start_datetime, web_time
+    FROM
+      processed.t_weblog
+    WHERE
+      web_time > 0
+    GROUP BY
+      house_num, web_start_datetime, web_time 
+    HAVING
+      COUNT(*) > 1
+  );") -> tmp
+```
+

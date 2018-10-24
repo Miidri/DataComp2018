@@ -1,0 +1,330 @@
+---
+title: "世帯Noの一致性について"
+author: "kotsubo takuto"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/DataComp2018/") 
+# max.print 
+options(max.print="10", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+## Library package
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(RPostgreSQL)
+```
+
+## sql setting
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+# house_num
+
+- 世帯No(`house_num`)は標本情報, アンケートデータ, TV再生ログ, TV接触ログ, WEB閲覧ログに含まれる主キー.
+- 標本情報に存在する,世帯Noが全てのデータの世帯Noを包含しているか, 確認する.
+- 一致しない個数, 一致しない世帯Noを表示する.
+
+## tv_sample_p_cv
+
+- 標本情報
+
+```{r}
+dbGetQuery(con2,
+"SELECT
+  COUNT(DISTINCT(house_num))
+FROM
+  processed.tv_sample_p_cv;")
+```
+
+## profiledata
+
+- アンケートデータになく, 標本情報にある: 36件
+- 標本情報になく, アンケートデータにある: 14件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_sample_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.profiledata
+  );")
+```
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.profiledata AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_sample_p_cv
+  );")
+```
+
+## tv_play_p_cv
+
+- TV再生ログになく, 標本情報にある: 992件
+- 標本情報になく, TV再生ログにある: 0件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_sample_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_play_p_cv
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_play_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_sample_p_cv
+  );")
+```
+
+## tv_orgn_p_cv
+
+- TV接触ログになく, 標本情報にある: 44件
+- 標本情報になく, TV接触ログにある: 0件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_sample_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_orgn_p_cv
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_orgn_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_sample_p_cv
+  );")
+```
+
+## t_weblog
+
+- WEBサイト閲覧ログになく, 標本情報にある: 2868件
+- 標本情報になく, WEBサイト閲覧ログにある: 1件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_sample_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.t_weblog
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.t_weblog AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_sample_p_cv
+  );")
+```
+
+## TV接触ログとTV再生ログについて
+
+- TV再生ログになく, TV接触ログにある: 948件
+- TV接触ログになく, TV再生ログにある: 0件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_orgn_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_play_p_cv
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_play_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_orgn_p_cv
+  );")
+```
+
+## TV再生ログとweb閲覧履歴
+
+- TV再生ログになく, WEB閲覧ログにある: 548件
+- WEB閲覧ログになく, TV再生ログにある: 2423件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.t_weblog AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_play_p_cv
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_play_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.t_weblog
+  );")
+```
+
+## TV接触ログとweb閲覧履歴
+
+- TV接触ログになく, WEB閲覧ログにある: 15件
+- WEB閲覧ログになく, TV接触ログにある: 2838件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.t_weblog AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.tv_orgn_p_cv
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.tv_orgn_p_cv AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.t_weblog
+  );")
+```

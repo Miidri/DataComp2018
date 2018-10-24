@@ -1,0 +1,930 @@
+---
+title: 't_weblog: EDA version1'
+author: "kotsubo takuto"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## packages
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(scales)
+library(DT)
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## functions
+
+```{r}
+# filter func
+pick <- function(condition){
+  function(d) d %>% filter_(condition)
+}
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+# Dataset overview
+
+- 対象となるデータについての説明, idea等
+
+## key word
+
+- url: [https://honawork.hatenablog.com]
+- domain: 独自ドメイン,特性により種類分けされており, gTLD, ccTLD, 新gTLDがある. [hatenablog.com]
+    - gTLD: 利用しやすい, [.com, .net, .org ...]
+    - ccTLD: 国を表す, [.jp, .co.jp, .us...]
+    - 新gTLD: 最近追加されたもの, [.tokyo, .shop...]
+- sub_domain: 1つのドメインを用途に応じて, 複数に分割する. [honawork.hatenablog.com]
+- user_agent: ユーザーエージェントとはウェブサイトに訪問する際に, どんな環境でアクセスしているかについての利用者の情報のこと. 情報は多次元的?? 
+- referrer: ユーザがサイトに流入するときに利用したリンク元のページの情報. ブックマークからの流入などリファラ情報が取得できないアクセスはノーリファラとして扱われる.
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    *
+   FROM 
+    processed.t_weblog
+   LIMIT 10;")
+```
+
+## thinking
+
+- `pc_flag`: その他が2つある. 特性があるのか確認する
+- `house_num`: アクセス頻度を集計する. flagごとなど 
+- `web_start_datetime`: 全体のアクセス時間比率, flagごとのアクセス時間, 世帯毎のアクセス時間
+- `domain`, `referrer_domain`: referrer -> url(referrer) -> url(referrer) ... のように同じタイミングでの, ネットサーフィンは連結しているか? 
+- `web_title`: ウェブタイトルがないのはなぜ?
+- `web_time`: 滞在時間のヒストグラム, 滞在時間と滞在時間の関係, ネットサーフィンの探索経路と滞在時間の関係.
+
+## opinion
+
+- yahoo検索, google検索データの活用, その他検索
+- user_agentの活用: スマホやiosの特定が可能, flagより情報多い?? -> 次回
+- 連続するurlを処理して, 真の1つのネットサーフィンを抽出
+
+# EDA
+
+- 基礎集計の確認, 可視化
+
+## flags
+
+- 種類: `pc_flag`, `sp_flag`, `tb_flag`
+- `pc_flag`: その他が0,9として存在している.
+
+```{r}
+# pc_flag
+t_weblog %>% 
+  group_by(pc_flag) %>% 
+  summarise(num=n()) %>%
+  ungroup() %>% 
+  dplyr::collect()
+# sp_flag
+t_weblog %>% 
+  group_by(sp_flag) %>% 
+  summarise(num=n()) %>%
+  ungroup() %>% 
+  dplyr::collect()
+# tb_flag
+t_weblog %>% 
+  group_by(tb_flag) %>% 
+  summarise(num=n()) %>%
+  ungroup() %>% 
+  dplyr::collect()
+```
+
+## hosue access
+
+- mean, percent tile point
+
+```{r}
+dbGetQuery(
+  con2,
+  "
+  SELECT
+    avg(t1.count) AS mean,
+    min(t1.count) AS min,
+    percentile_disc(0.05) WITHIN GROUP (ORDER BY t1.count) AS pct5,
+    percentile_disc(0.1) WITHIN GROUP (ORDER BY t1.count) AS pct1,
+    percentile_disc(0.25) WITHIN GROUP (ORDER BY t1.count) AS pct25,
+    percentile_disc(0.5) WITHIN GROUP (ORDER BY t1.count) AS pct50,
+    percentile_disc(0.75) WITHIN GROUP (ORDER BY t1.count) AS pct75,
+    percentile_disc(0.9) WITHIN GROUP (ORDER BY t1.count) AS pct90,
+    percentile_disc(0.95) WITHIN GROUP (ORDER BY t1.count) AS pct95,
+    max(t1.count) AS max
+  FROM
+    (SELECT
+      house_num,
+      COUNT(house_num)
+     FROM 
+      processed.t_weblog
+     GROUP BY
+      house_num) AS t1;
+  ")
+```
+
+- bar plot, 上位10%と下位90%を分割
+
+```{r }
+options(scipen=2)
+t_weblog %>% 
+  group_by(house_num) %>%
+  summarise(num=n()) %>% 
+  ungroup() %>% 
+  filter(num >= 30581) %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(x=reorder(house_num,-num),y=num)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,580000)) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+```
+
+```{r }
+options(scipen=2)
+t_weblog %>% 
+  group_by(house_num) %>%
+  summarise(num=n()) %>% 
+  ungroup() %>% 
+  filter(num <= 30581) %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(x=reorder(house_num,-num),y=num)) +
+  geom_bar(stat = "identity", colour = "steelblue") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,35000)) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+```
+
+- house_numごとの時系列heat map
+
+```{r}
+# extract data
+tmp1 <- dbGetQuery(
+  con2,
+  "SELECT
+    house_num,
+    CAST(web_start_datetime AS DATE),
+    COUNT(CAST(web_start_datetime AS DATE))
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    CAST(web_start_datetime AS DATE), house_num;")
+# arrange sort
+tmp2 <- tmp1 %>% 
+  group_by(house_num) %>% 
+  summarize(min = min(web_start_datetime),
+            max = max(web_start_datetime)) %>% 
+  ungroup() %>% 
+  arrange(min,max,house_num)
+# make new columns by order
+tmp1$house_num_new <- factor(tmp1$house_num, levels=tmp2$house_num)
+# ggplot
+ggplot(tmp1,aes(x= web_start_datetime, y= house_num_new)) + 
+  geom_tile(aes(fill = count)) +
+  scale_fill_gradient(low = "steelblue", high = "darkblue") + 
+  labs(y= "house_num", x="date") +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+rm(tmp1,tmp2)
+```
+
+## datetime
+
+- 種類: `web_start_datetime`(通常時刻) , `web_date`(業界時間)
+- アクセス時間, 曜日, 時間の傾向
+
+### 全体データ
+
+```{r }
+# 通常時刻
+options(scipen=2)
+dbGetQuery(
+  con2,
+  "SELECT
+    CAST(web_start_datetime AS DATE),
+    EXTRACT(DOW FROM CAST(web_start_datetime AS DATE)) AS weekday,
+    COUNT(CAST(web_start_datetime AS DATE))
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    CAST(web_start_datetime AS DATE);") %>% 
+  filter(web_start_datetime < "2018-04-01") %>% 
+  mutate(posi_date = as.POSIXct(web_start_datetime)) %>% 
+  ggplot(aes(x=posi_date, y=count)) +
+    geom_point(data = pick(~weekday == 0), colour = "deeppink2", size=2) +
+    geom_point(data = pick(~weekday == 6), colour = "steelblue", size=2) +
+    geom_line() +  
+    annotate("text", x=as.POSIXct("2017-09-01"),y=Inf, hjust=-.2,vjust=2, parse=T, label='"blue point: Saturday " * phantom("pink point: Sunday")', color="steelblue", size = 5) +
+    annotate("text", x=as.POSIXct("2017-09-01"),y=Inf, hjust=-.2,vjust=2, parse=T, label='phantom("blue point: Saturday ") * "pink point: Sunday"', color="deeppink2", size = 5) +
+    scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1),
+          axis.title.x = element_blank())
+```
+
+```{r }
+# 業界時間
+options(scipen=2)
+dbGetQuery(
+  con2,
+  "SELECT
+    web_date,
+    EXTRACT(DOW FROM web_date) AS weekday,
+    COUNT(web_date)
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    web_date;") %>% 
+  filter(web_date < "2018-04-01") %>% 
+  mutate(posi_date = as.POSIXct(web_date)) %>% 
+  ggplot(aes(x=posi_date, y=count)) +
+    geom_point(data = pick(~weekday == 0), colour = "deeppink2", size=2) +
+    geom_point(data = pick(~weekday == 6), colour = "steelblue", size=2) +
+    geom_line() +  
+    annotate("text", x=as.POSIXct("2017-09-01"),y=Inf, hjust=-.2,vjust=2, parse=T, label='"blue point: Saturday " * phantom("pink point: Sunday")', color="steelblue", size = 5) +
+    annotate("text", x=as.POSIXct("2017-09-01"),y=Inf, hjust=-.2,vjust=2, parse=T, label='phantom("blue point: Saturday ") * "pink point: Sunday"', color="deeppink2", size = 5) +
+    scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1),
+          axis.title.x = element_blank())
+```
+
+### 月 & 日
+
+- 観測数が少ないので4月は消去
+- 時系列順には9月, 10月, 11月, 12月 ...
+
+```{r}
+# 通常時刻
+options(scipen=2)
+dbGetQuery(
+  con2,
+  "SELECT
+    EXTRACT(MONTH FROM web_start_datetime) AS month1,
+    (ARRAY['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Des'])
+    [EXTRACT(MONTH FROM web_start_datetime)] AS month2,
+    EXTRACT(DAY FROM web_start_datetime) AS day,
+    COUNT(EXTRACT(DAY FROM web_start_datetime))
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    EXTRACT(MONTH FROM web_start_datetime),
+    EXTRACT(DAY FROM web_start_datetime);") %>% 
+  filter(month1 != 4) %>%  
+  ggplot(aes(x=day, y=count)) +
+  geom_line() +
+  facet_wrap(vars(month1),ncol = 4)  
+```
+
+```{r }
+# 業界時間
+options(scipen=2)
+dbGetQuery(
+  con2,
+  "SELECT
+    EXTRACT(MONTH FROM web_date) AS month1,
+    (ARRAY['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Des'])
+    [EXTRACT(MONTH FROM web_date)] AS month2,
+    EXTRACT(DAY FROM web_date) AS day,
+    COUNT(EXTRACT(DAY FROM web_date))
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    EXTRACT(MONTH FROM web_date),
+    EXTRACT(DAY FROM web_date);") %>% 
+  filter(month1 != 4) %>%  
+  ggplot(aes(x=day, y=count)) +
+  geom_line() +
+  facet_wrap(vars(month1),ncol = 4)  
+```
+
+### 曜日 & 時間
+
+- 0~6 (0が日曜日, 1が月曜日 ...)
+
+```{r }
+# 普通時間
+options(scipen=2)
+dbGetQuery(
+  con2,
+  "SELECT
+    EXTRACT(DOW FROM web_start_datetime) AS dow1,
+    EXTRACT(HOUR FROM web_start_datetime) AS hour,
+    (ARRAY['Sun','Mon','Tue','Wed','Thu','Fri','Sat'])[EXTRACT(dow FROM web_start_datetime) + 1] AS dow2,
+    COUNT(EXTRACT(HOUR FROM web_start_datetime))
+   FROM
+    processed.t_weblog
+   GROUP BY 
+    EXTRACT(DOW FROM web_start_datetime),
+    EXTRACT(HOUR FROM web_start_datetime);") %>% 
+  ggplot(aes(x=hour, y=count)) +
+  geom_line() +
+  facet_wrap(vars(dow1),ncol = 4) 
+```
+
+## web_time
+
+- ページ移動早すぎる?? -> ネットサーフィンの中継になってるだけ or システム側の問題
+- 時間0秒?? -> システム問題
+- 単位: second
+
+```{r}
+dbGetQuery(
+  con2,
+  "
+  SELECT
+    avg(web_time) AS mean,
+    min(web_time) AS min,
+    percentile_disc(0.05) WITHIN GROUP (ORDER BY web_time) AS pct5,
+    percentile_disc(0.1) WITHIN GROUP (ORDER BY web_time) AS pct1,
+    percentile_disc(0.25) WITHIN GROUP (ORDER BY web_time) AS pct25,
+    percentile_disc(0.5) WITHIN GROUP (ORDER BY web_time) AS pct50,
+    percentile_disc(0.75) WITHIN GROUP (ORDER BY web_time) AS pct75,
+    percentile_disc(0.9) WITHIN GROUP (ORDER BY web_time) AS pct90,
+    percentile_disc(0.95) WITHIN GROUP (ORDER BY web_time) AS pct95,
+    max(web_time) AS max
+  FROM
+    processed.t_weblog;")
+```
+
+- bar_plot (0~10)
+
+```{r }
+t_weblog %>% 
+  group_by(web_time) %>% 
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(x=web_time,y=num)) +
+  geom_bar(stat = "identity",fill = "steelblue") +
+  geom_text(aes(label=num), vjust=0,size=3) + 
+  xlim(c(-0.5,10.5))
+```
+
+- bar_plot (0~100)
+
+```{r }
+t_weblog %>% 
+  group_by(web_time) %>% 
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(x=web_time,y=num)) +
+  geom_bar(stat = "identity",fill = "steelblue") +
+  geom_text(aes(label=num), vjust=0.5, hjust=1, angle=-90,size=2) +
+  xlim(c(-0.5,100.5))
+```
+
+## domain
+
+- yahooが多いが, 検索エンジンだけでなくyahooオークションやyahooニュースの影響もある.
+
+```{r }
+t_weblog %>% 
+  group_by(domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  top_n(30,num) %>% 
+  ggplot(aes(x= reorder(domain, -num),y = num)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+```{r}
+t_weblog %>% 
+  group_by(domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  arrange(desc(num)) %>% 
+  DT::datatable()
+```
+
+## sub_domain
+
+- サブドメインではgoogleが1位
+
+```{r }
+t_weblog %>% 
+  group_by(sub_domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  top_n(30,num) %>% 
+  ggplot(aes(x= reorder(sub_domain, -num),y = num)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+```{r}
+t_weblog %>% 
+  group_by(sub_domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  arrange(desc(num)) %>% 
+  DT::datatable()
+```
+
+## referrer domain
+
+- 25%程度NULL
+
+```{r }
+t_weblog %>% 
+  group_by(referrer_domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  top_n(30,num) %>% 
+  ggplot(aes(x= reorder(referrer_domain, -num),y = num)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+```{r}
+t_weblog %>% 
+  group_by(referrer_domain) %>%
+  summarise(num = n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  arrange(desc(num)) %>% 
+  DT::datatable()
+```
+
+## web_title
+
+- 検索記録の法則から, 各サイトの検索キーワードを抽出する
+- TV視聴と検索の関係性とか
+
+```{r eval=FALSE, echo=FALSE}
+# 調査用
+dbGetQuery(
+  con2,
+  "SELECT web_title, COUNT(web_title)
+   FROM processed.t_weblog
+   WHERE web_title NOT LIKE '%Google%'
+   AND web_title NOT LIKE '%Yahoo%'
+   AND web_title NOT LIKE '%楽天%'
+   AND web_title NOT LIKE '%Twitter%'
+   AND web_title NOT LIKE '%Facebook%'
+   AND web_title NOT LIKE '%goo%'
+   AND web_title LIKE '%検索%'
+   GROUP BY web_title;") -> tmp
+```
+
+- yahoo検索: '%」の検索結果 - Yahoo!検索'
+- google検索: '%- Google 検索%'
+- 楽天検索: '%- 楽天ウェブ検索%'
+- Twitter: '%- Twitter検索%'
+- Facebook: '%- Facebook検索%'
+- goo: '%- goo検索%'
+
+### yahoo
+
+```{r}
+yahoo_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%」の検索結果 - Yahoo!検索'
+  GROUP BY
+    web_title;") %>% 
+  mutate(web_title = str_sub(web_title, start = 2, end = -1)) %>% # 1文字目の"「"削除
+  #mutate(web_title = str_replace(web_title,"」の検索結果 - Yahoo!検索（動画）", "")) %>% # 動画検索ワード削除
+  #mutate(web_title = str_replace(web_title,"」の検索結果 - Yahoo!検索（画像）", "")) %>% # 画像検索ワード削除
+  mutate(web_title = str_replace(web_title,"」の検索結果 - Yahoo!検索","")) # 検索の定型削除
+
+# 検索ランキング
+yahoo_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank()) 
+```
+
+### Google
+
+```{r}
+google_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%- Google 検索%'
+  GROUP BY 
+    web_title;") %>% 
+  mutate(web_title = str_replace(web_title," - Google 検索","")) # 検索の定型削除
+
+# 検索ランキング
+google_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+### 楽天
+
+```{r}
+rakuten_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%- 楽天ウェブ検索%'
+  GROUP BY 
+    web_title;") %>% 
+  mutate(web_title = str_replace(web_title," - 楽天ウェブ検索","")) # 検索の定型削除
+
+# 検索ランキング
+rakuten_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+### Twitter
+
+```{r}
+twitter_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%- Twitter検索%'
+  GROUP BY 
+    web_title;") %>% 
+  mutate(web_title = str_replace(web_title," - Twitter検索","")) # 検索の定型削除
+
+# 検索ランキング
+twitter_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+### facebook
+
+```{r}
+facebook_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%- Facebook検索%'
+  GROUP BY 
+    web_title;") %>% 
+  mutate(web_title = str_replace(web_title," - Facebook検索","")) # 検索の定型削除
+
+# 検索ランキング
+facebook_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+### goo
+
+```{r}
+goo_search <- dbGetQuery(
+  con2,
+  "SELECT
+    web_title,
+    COUNT(web_title)
+  FROM 
+    processed.t_weblog
+  WHERE
+    web_title LIKE '%- goo検索%'
+  GROUP BY 
+    web_title;") %>% 
+  mutate(web_title = str_sub(web_title, start = 2, end = -1)) %>% # 1文字目の"「"削除
+  mutate(web_title = str_replace(web_title,"]の検索結果 - goo検索","")) # 検索の定型削除
+
+# 検索ランキング
+goo_search %>% 
+  top_n(50,count) %>% 
+  ggplot(aes(x= reorder(web_title, -count),y = count)) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme_classic(base_family = "HiraKakuPro-W3") + 
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
+## url
+
+- 並び替えを一意に定めるため, `house_num`, `web_start_datetime`, `web_time`について, 重複を取り除く. この作業は必要であるが, 妥当であるかは不明. 例えば, 世帯内で二人の人物が別媒体により同時にアクセスして, 同時に接続を切るというような状況があれば起こりうる. `house_num`と`user_agent`を利用して, 比較を行いたいが, そもそもorder byを一意にするためには重複があってはならない. 詳細は別記する. 
+
+- 重複削除済みデータ: 47399736件
+
+```{r}
+dbGetQuery(
+  con2,
+"SELECT
+  COUNT(*)
+FROM
+  processed.t_weblog  
+WHERE
+  (house_num, web_start_datetime, web_time)
+  IN(
+    SELECT
+      house_num, web_start_datetime, web_time
+    FROM
+      processed.t_weblog
+    -- WHERE
+    --  web_time > 0
+    GROUP BY
+      house_num, web_start_datetime, web_time 
+    HAVING
+      COUNT(*) = 1
+  );")
+```
+
+### 同一urlの連続
+
+- 9047373件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    COUNT(*)
+  FROM
+  (
+  SELECT
+    house_num,
+    web_start_datetime,
+    web_time,
+    url,
+    lag(url) OVER(PARTITION BY house_num ORDER BY web_start_datetime, web_time) AS past_url
+  FROM
+    processed.t_weblog
+  WHERE
+  (house_num, web_start_datetime, web_time)
+  IN(
+    SELECT
+      house_num, web_start_datetime, web_time
+    FROM
+      processed.t_weblog
+    -- WHERE
+    --  web_time > 0
+    GROUP BY
+      house_num, web_start_datetime, web_time 
+    HAVING
+      COUNT(*) = 1)
+    ) AS t1
+  WHERE 
+    t1.url = t1.past_url;")
+```
+
+### urlとreferrer_urlでの連結
+
+- 5644304件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    COUNT(*)
+  FROM
+  (
+  SELECT
+    house_num,
+    web_start_datetime,
+    web_time,
+    url,
+    lag(referrer) OVER(PARTITION BY house_num ORDER BY web_start_datetime, web_time) AS past_referrer
+  FROM
+    processed.t_weblog
+  WHERE
+    (house_num, web_start_datetime, web_time)
+    IN(
+      SELECT
+        house_num, web_start_datetime, web_time
+      FROM
+        processed.t_weblog
+      -- WHERE
+      --  web_time > 0
+      GROUP BY
+        house_num, web_start_datetime, web_time 
+      HAVING
+        COUNT(*) = 1)
+      ) AS t1
+  WHERE 
+    t1.url = t1.past_referrer;")
+```
+
+## user_agent
+
+- OSの判定
+    - [apple関連](http://www13.plala.or.jp/bigdata/user_agent.html#ipad)
+    - [検索](http://cya.sakura.ne.jp/java/browser/useragent.htm)
+
+- Android少し複雑, 要調査
+- 細かく分割すれば, house_num, date, web_timeに加えて, ユニークな列が増える??
+
+```{r}
+dbGetQuery(
+  con2,
+  "
+SELECT
+  t1.os,
+  COUNT(t1.os)
+FROM
+  (
+  SELECT
+    CASE
+      -- NULL --
+      WHEN user_agent='' THEN ''
+      -- windows --
+      WHEN user_agent LIKE '%Windows NT 5.0%' THEN 'windows_2000'
+      WHEN user_agent LIKE '%Windows NT 5.1%' THEN 'windows_xp'
+      WHEN user_agent LIKE '%Windows NT 5.2%' THEN 'windows_xp.64'
+      WHEN user_agent LIKE '%Windows NT 6.0%' THEN 'windows_vista'
+      WHEN user_agent LIKE '%Windows NT 6.1%' THEN 'windows_7'
+      WHEN user_agent LIKE '%Windows NT 6.2%' THEN 'windows_8'
+      WHEN user_agent LIKE '%Windows NT 6.3%' THEN 'windows_8_1'
+      WHEN user_agent LIKE '%Windows NT 10.0%' THEN 'windows_10'
+      WHEN user_agent LIKE '%Windows%' THEN 'windows' -- 2つ変なのがある
+      -- mac --
+      WHEN user_agent LIKE '%Mac OS X 10_5%' OR user_agent LIKE '%Mac OS X 10.5%' THEN 'mac_10_5'
+      WHEN user_agent LIKE '%Mac OS X 10_6%' OR user_agent LIKE '%Mac OS X 10.6%' THEN 'mac_10_6'
+      WHEN user_agent LIKE '%Mac OS X 10_7%' OR user_agent LIKE '%Mac OS X 10.7%' THEN 'mac_10_7'
+      WHEN user_agent LIKE '%Mac OS X 10_8%' OR user_agent LIKE '%Mac OS X 10.8%' THEN 'mac_10_8'
+      WHEN user_agent LIKE '%Mac OS X 10_9%' OR user_agent LIKE '%Mac OS X 10.9%' THEN 'mac_10_9'
+      WHEN user_agent LIKE '%Mac OS X 10_10%' OR user_agent LIKE '%Mac OS X 10.10%' THEN 'mac_10_10'
+      WHEN user_agent LIKE '%Mac OS X 10_11%' OR user_agent LIKE '%Mac OS X 10.11%' THEN 'mac_10_11'
+      WHEN user_agent LIKE '%Mac OS X 10_12%' OR user_agent LIKE '%Mac OS X 10.12%' THEN 'mac_10_12'
+      WHEN user_agent LIKE '%Mac OS X 10_13%' OR user_agent LIKE '%Mac OS X 10.13%' THEN 'mac_10_13'
+      -- linux --
+      WHEN user_agent LIKE '%Linux x86_64%' AND user_agent NOT LIKE '%Android%' THEN 'linux_64'
+      WHEN user_agent LIKE '%Linux i686%' AND user_agent NOT LIKE '%Android%' THEN 'linux_32'
+      WHEN user_agent LIKE '%CrOS%' THEN 'chrome'
+      -- game --
+      WHEN user_agent LIKE '%Nintendo WiiU%' THEN 'wii'
+      WHEN user_agent LIKE '%PlayStation 4 1.52%' THEN 'playstation_4'
+      WHEN user_agent LIKE '%PlayStation Vita 1.50%' THEN 'ps_vita'
+      WHEN user_agent LIKE '%Nintendo Switch%' THEN 'switch'
+      WHEN user_agent LIKE '%New Nintendo 3DS%' THEN '3ds'
+      -- iphone --
+      WHEN user_agent LIKE '%iPhone OS 11_3%' THEN 'iphone_11_3' 
+      WHEN user_agent LIKE '%iPhone OS 11_2%' THEN 'iphone_11_2'
+      WHEN user_agent LIKE '%iPhone OS 11_1%' THEN 'iphone_11_1'
+      WHEN user_agent LIKE '%iPhone OS 11_0%' THEN 'iphone_11_0'
+      WHEN user_agent LIKE '%iPhone OS 10_3%' THEN 'iphone_10_3'
+      WHEN user_agent LIKE '%iPhone OS 10_2%' THEN 'iphone_10_2'
+      WHEN user_agent LIKE '%iPhone OS 10_1%' THEN 'iphone_10_1'
+      WHEN user_agent LIKE '%iPhone OS 10_0%' THEN 'iphone_10_0'
+      WHEN user_agent LIKE '%iPhone OS 9_3%' THEN 'iphone_9_3'
+      WHEN user_agent LIKE '%iPhone OS 9_2%' THEN 'iphone_9_2'     
+      WHEN user_agent LIKE '%iPhone OS 9_1%' THEN 'iphone_9_1'      
+      WHEN user_agent LIKE '%iPhone OS 9_0%' THEN 'iphone_9_0'
+      WHEN user_agent LIKE '%iPhone OS 8_4%' THEN 'iphone_8_4'
+      WHEN user_agent LIKE '%iPhone OS 8_3%' THEN 'iphone_8_3'     
+      WHEN user_agent LIKE '%iPhone OS 8_2%' THEN 'iphone_8_2'      
+      WHEN user_agent LIKE '%iPhone OS 8_1%' THEN 'iphone_8_1'
+      WHEN user_agent LIKE '%iPhone OS 8_0%' THEN 'iphone_8_0'
+      WHEN user_agent LIKE '%iPhone OS 7_1%' THEN 'iphone_7_1'     
+      WHEN user_agent LIKE '%iPhone OS 7_0%' THEN 'iphone_7_0' 
+      WHEN user_agent LIKE '%iPhone OS 6_1%' THEN 'iphone_6_1'      
+      WHEN user_agent LIKE '%iPhone OS 6_0%' THEN 'iphone_6_0'
+      WHEN user_agent LIKE '%iPhone OS 5_1%' THEN 'iphone_5_1'
+      WHEN user_agent LIKE '%iPhone OS 4_3%' THEN 'iphone_4_3'     
+      WHEN user_agent LIKE '%iPhone OS 4_0%' THEN 'iphone_4_0' 
+      WHEN user_agent LIKE '%iPhone OS 3_1%' THEN 'iphone_3_1' 
+      WHEN user_agent LIKE '%iPhone OS 3_0%' THEN 'iphone_3_0' 
+      WHEN user_agent LIKE '%iPhone%' THEN 'iphone' -- 6つ変なのがある.
+      -- ipad--
+      WHEN user_agent LIKE '%iPad; CPU OS 11_3%' THEN 'ipad_11_3' 
+      WHEN user_agent LIKE '%iPad; CPU OS 11_2%' THEN 'ipad_11_2'
+      WHEN user_agent LIKE '%iPad; CPU OS 11_1%' THEN 'ipad_11_1'
+      WHEN user_agent LIKE '%iPad; CPU OS 11_0%' THEN 'ipad_11_0'
+      WHEN user_agent LIKE '%iPad; CPU OS 10_3%' THEN 'ipad_10_3'
+      WHEN user_agent LIKE '%iPad; CPU OS 10_2%' THEN 'ipad_10_2'
+      WHEN user_agent LIKE '%iPad; CPU OS 10_1%' THEN 'ipad_10_1'
+      WHEN user_agent LIKE '%iPad; CPU OS 10_0%' THEN 'ipad_10_0'
+      WHEN user_agent LIKE '%iPad; CPU OS 9_3%' THEN 'ipad_9_3'
+      WHEN user_agent LIKE '%iPad; CPU OS 9_2%' THEN 'ipad_9_2'     
+      WHEN user_agent LIKE '%iPad; CPU OS 9_1%' THEN 'ipad_9_1'      
+      WHEN user_agent LIKE '%iPad; CPU OS 9_0%' THEN 'ipad_9_0'
+      WHEN user_agent LIKE '%iPad; CPU OS 8_4%' THEN 'ipad_8_4'
+      WHEN user_agent LIKE '%iPad; CPU OS 8_3%' THEN 'ipad_8_3'     
+      WHEN user_agent LIKE '%iPad; CPU OS 8_2%' THEN 'ipad_8_2'      
+      WHEN user_agent LIKE '%iPad; CPU OS 8_1%' THEN 'ipad_8_1'
+      WHEN user_agent LIKE '%iPad; CPU OS 8_0%' THEN 'ipad_8_0'
+      WHEN user_agent LIKE '%iPad; CPU OS 7_1%' THEN 'ipad_7_1'     
+      WHEN user_agent LIKE '%iPad; CPU OS 7_0%' THEN 'ipad_7_0' 
+      WHEN user_agent LIKE '%iPad; CPU OS 6_1%' THEN 'ipad_6_1'      
+      WHEN user_agent LIKE '%iPad; CPU OS 6_0%' THEN 'ipad_6_0'
+      WHEN user_agent LIKE '%iPad; CPU OS 5_1%' THEN 'ipad_5_1'
+      WHEN user_agent LIKE '%iPad; CPU OS 4_3%' THEN 'ipad_4_3'     
+      WHEN user_agent LIKE '%iPad; CPU OS 4_0%' THEN 'ipad_4_0' 
+      WHEN user_agent LIKE '%iPad; CPU OS 3_1%' THEN 'ipad_3_1' 
+      WHEN user_agent LIKE '%iPad; CPU OS 3_0%' THEN 'ipad_3_0' 
+      WHEN user_agent LIKE '%iPad%' THEN 'ipad' -- 2つ変なのがある.
+      -- android --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Mobile%' THEN 'android'  -- スマホ?
+      WHEN user_agent LIKE '%Android%' THEN 'android' -- タブレット?
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Windows Phone%' THEN 'windows_phone' 
+      WHEN user_agent LIKE '%Mobile%' AND user_agent LIKE '%Gecko%' 
+        AND user_agent LIKE '%Firefox%' AND user_agent NOT LIKE '%Android%' THEN 'firefox_os' 
+      WHEN user_agent LIKE '%BB10%' AND user_agent LIKE '%Mobile%' THEN 'android' 
+      ELSE 'other'
+    END AS os
+  FROM
+    processed.t_weblog
+  ) AS t1
+GROUP BY
+  t1.os;") -> tmp
+```
+
+```{r}
+tmp %>% 
+  ggplot(aes(x=reorder(os,-count), y=count)) + 
+  geom_bar(stat = "identity", fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 90,hjust = 1, vjust = 0.5),
+          axis.title.x = element_blank())
+```
+
