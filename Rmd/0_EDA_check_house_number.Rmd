@@ -328,3 +328,41 @@ dbGetQuery(
         processed.t_weblog
   );")
 ```
+
+## アンケートとweb閲覧ログ
+
+- アンケートになく, WEB閲覧ログにある: 29件
+- WEB閲覧ログになく, アンケートにある: 2874件
+
+```{r}
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.t_weblog AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.profiledata
+  );")
+
+dbGetQuery(
+  con2,
+  "SELECT
+    DISTINCT(A.house_num)
+  FROM
+    processed.profiledata AS A
+  WHERE
+    (house_num)
+    NOT IN(
+      SELECT
+        DISTINCT(house_num)
+      FROM
+        processed.t_weblog
+  );")
+```
+
