@@ -265,7 +265,6 @@ WHERE
   user_agent NOT LIKE '%%' AND -- 
   user_agent NOT LIKE '%%' AND -- 
   user_agent NOT LIKE '%%' AND -- 
-  
 GROUP BY
   user_agent;
 
