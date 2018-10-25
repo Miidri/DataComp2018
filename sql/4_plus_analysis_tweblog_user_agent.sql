@@ -229,6 +229,7 @@ SELECT
 FROM 
   processed.t_weblog
 WHERE
+  
   user_agent LIKE '%Android%' AND user_agent LIKE'%Mobile%' AND
   user_agent NOT LIKE '%Nexus 5%' AND -- nexus_5
   user_agent NOT LIKE '%Nexus 6%' AND -- nexus_6
@@ -251,11 +252,20 @@ WHERE
   user_agent NOT LIKE '%F-10D%' AND -- arrows_x_f_10_d
   user_agent NOT LIKE '%SBM203SH%' AND -- aquos_xx_203_sh
   user_agent NOT LIKE '%SBM302SH%' AND -- aquos_xx_302_sh
-
   user_agent NOT LIKE '%F-05D%' AND -- arrows_x_lte_f_05_d
   user_agent NOT LIKE '%lenovo%' AND -- lenovo
   user_agent NOT LIKE '%SM-G900P%' AND -- samsung_sm_g_900_p
   user_agent NOT LIKE '%SH-07D%' AND -- aquos_sh_07_d
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%%' AND -- 
+  
 GROUP BY
   user_agent;
 
