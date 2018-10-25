@@ -803,6 +803,7 @@ dbGetQuery(
     - [検索](http://cya.sakura.ne.jp/java/browser/useragent.htm)
 
 - Android少し複雑, 要調査
+- スマホのキャリア特定できる?
 - 細かく分割すれば, house_num, date, web_timeに加えて, ユニークな列が増える??
 
 ```{r}
