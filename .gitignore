@@ -7,3 +7,4 @@
 script/sql_connect.R
 image/
 slide/
+rmd/*.html
