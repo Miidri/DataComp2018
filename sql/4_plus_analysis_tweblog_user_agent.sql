@@ -208,7 +208,7 @@ FROM
       WHEN user_agent LIKE '%iPad%' THEN 'ipad' -- 2つ変なのがある.
       -- android --
       WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Mobile%' THEN 'android'  -- スマホ?
-      WHEN user_agent LIKE '%Android%' THEN 'android' -- タブレット?
+      WHEN user_agent LIKE '%Android%' THEN 'android_tablet' -- タブレット?
       WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Windows Phone%' THEN 'windows_phone' 
       WHEN user_agent LIKE '%Mobile%' AND user_agent LIKE '%Gecko%' 
         AND user_agent LIKE '%Firefox%' AND user_agent NOT LIKE '%Android%' THEN 'firefox_os' 
@@ -222,11 +222,57 @@ FROM
 WHERE
   t1.os = 'other';
 
--- test
+-- test: 機種
 SELECT
-  user_agent
+  user_agent,
+  COUNT(user_agent)
 FROM 
   processed.t_weblog
 WHERE
-  user_agent LIKE '%Android%'
-LIMIT 1000;
+  user_agent LIKE '%Android%' AND user_agent LIKE'%Mobile%' AND
+  user_agent NOT LIKE '%Nexus 5%' AND -- nexus_5
+  user_agent NOT LIKE '%Nexus 6%' AND -- nexus_6
+  user_agent NOT LIKE '%SHV31%' AND -- aquos_serie_mini
+  user_agent NOT LIKE '%402SH%' AND-- aquos_crystal_x
+  user_agent NOT LIKE '%SH-01G%' AND -- aquos_zeta
+  user_agent NOT LIKE '%SO-04D%' AND -- xperia_so_04_d
+  user_agent NOT LIKE '%SC-02E%' AND -- galaxy_note_sc_02_e
+  user_agent NOT LIKE '%SC-03D%' AND -- galaxy_s_2_lte_sc_03_d
+  user_agent NOT LIKE '%SHL22%' AND -- aquos_serie_shl_22
+  user_agent NOT LIKE '%SHL21%' AND -- aquos_serie_shl_21
+  user_agent NOT LIKE '%F-06E%' AND -- arrows_nx_f_06_e
+  user_agent NOT LIKE '%N-03E%' AND -- disney_mobile_n_03_e
+  user_agent NOT LIKE '%KYY22%' AND -- urbano_l_02
+  user_agent NOT LIKE '%301F%' AND -- arrows_a_301f
+  user_agent NOT LIKE '%Galaxy Nexus%' AND -- galaxy_nexus
+  user_agent NOT LIKE '%HTL22%' AND -- j_one_htl_22
+  user_agent NOT LIKE '%SH-05F%' AND -- disney_mobile_sh_05_f
+  user_agent NOT LIKE '%SBM203SH%' AND -- aquos_xx_203_sh
+  user_agent NOT LIKE '%F-10D%' AND -- arrows_x_f_10_d
+  user_agent NOT LIKE '%SBM203SH%' AND -- aquos_xx_203_sh
+  user_agent NOT LIKE '%SBM302SH%' AND -- aquos_xx_302_sh
+
+  user_agent NOT LIKE '%F-05D%' AND -- arrows_x_lte_f_05_d
+  user_agent NOT LIKE '%lenovo%' AND -- lenovo
+  user_agent NOT LIKE '%SM-G900P%' AND -- samsung_sm_g_900_p
+  user_agent NOT LIKE '%SH-07D%' AND -- aquos_sh_07_d
+GROUP BY
+  user_agent;
+
+-- test:キャリアできない
+SELECT
+  career,
+  COUNT(career)
+FROM(
+  SELECT
+    CASE 
+      WHEN user_agent LIKE '%DoCoMo%' THEN 'docomo'
+      WHEN user_agent LIKE '%UP.Browser%' THEN 'au'
+      WHEN user_agent LIKE '%J-PHONE%' THEN 'softbank'
+      ELSE 'other'
+    END AS career
+  FROM
+    processed.t_weblog
+    ) AS t1
+GROUP BY 
+  career;
