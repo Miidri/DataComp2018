@@ -906,7 +906,7 @@ FROM
       WHEN user_agent LIKE '%iPad%' THEN 'ipad' -- 2つ変なのがある.
       -- android --
       WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Mobile%' THEN 'android'  -- スマホ?
-      WHEN user_agent LIKE '%Android%' THEN 'android' -- タブレット?
+      WHEN user_agent LIKE '%Android%' THEN 'android_tablet' -- タブレット?
       WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Windows Phone%' THEN 'windows_phone' 
       WHEN user_agent LIKE '%Mobile%' AND user_agent LIKE '%Gecko%' 
         AND user_agent LIKE '%Firefox%' AND user_agent NOT LIKE '%Android%' THEN 'firefox_os' 
