@@ -1,0 +1,19 @@
+---
+title: "中間発表スライド準備"
+output: html_document
+---
+
+# Report 
+
+- 中間発表に向けて, アイデアや目標などを示す.
+
+## url
+
+- [GRPの計算方法について](http://www.sales-ntv.com/jissen/pattern.html)
+- [広告費用について](https://tech.nikkeibp.co.jp/it/article/Keyword/20080409/298530/)
+- 
+## 目標
+
+- 広告効果モデル
+
+従来手法のGRP(延べ視聴率)
