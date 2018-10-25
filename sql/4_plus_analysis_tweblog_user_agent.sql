@@ -229,49 +229,62 @@ SELECT
 FROM 
   processed.t_weblog
 WHERE
-  
   user_agent LIKE '%Android%' AND user_agent LIKE'%Mobile%' AND
+  user_agent NOT LIKE '%Nexus 4%' AND -- nexus_4
   user_agent NOT LIKE '%Nexus 5%' AND -- nexus_5
   user_agent NOT LIKE '%Nexus 6%' AND -- nexus_6
-  user_agent NOT LIKE '%SHV31%' AND -- aquos_serie_mini
+  user_agent NOT LIKE '%SHV31%' AND -- aquos_serie_mini_shb_31
   user_agent NOT LIKE '%402SH%' AND-- aquos_crystal_x
-  user_agent NOT LIKE '%SH-01G%' AND -- aquos_zeta
+  user_agent NOT LIKE '%SH-01G%' AND -- aquos_zeta_sh_01_g
+  user_agent NOT LIKE '%SH-01F%' AND -- aquos_zeta_sh_01_f
+  user_agent NOT LIKE '%SH-04E%' AND -- aquos_ex_sh_04_e
+  user_agent NOT LIKE '%SO-03D%' AND -- xperia_so_03_d
   user_agent NOT LIKE '%SO-04D%' AND -- xperia_so_04_d
+  user_agent NOT LIKE '%SO-06D%' AND -- xperia_so_06_d
+
   user_agent NOT LIKE '%SC-02E%' AND -- galaxy_note_sc_02_e
   user_agent NOT LIKE '%SC-03D%' AND -- galaxy_s_2_lte_sc_03_d
   user_agent NOT LIKE '%SHL22%' AND -- aquos_serie_shl_22
   user_agent NOT LIKE '%SHL21%' AND -- aquos_serie_shl_21
   user_agent NOT LIKE '%F-06E%' AND -- arrows_nx_f_06_e
+  user_agent NOT LIKE '%SH-02G%' AND -- disney_mobile_sh_02_g
+  user_agent NOT LIKE '%SH-05F%' AND -- disney_mobile_sh_05_f
   user_agent NOT LIKE '%N-03E%' AND -- disney_mobile_n_03_e
+  user_agent NOT LIKE '%F-03F%' AND -- disney_mobile_f_03_f
+
   user_agent NOT LIKE '%KYY22%' AND -- urbano_l_02
   user_agent NOT LIKE '%301F%' AND -- arrows_a_301f
   user_agent NOT LIKE '%Galaxy Nexus%' AND -- galaxy_nexus
   user_agent NOT LIKE '%HTL22%' AND -- j_one_htl_22
-  user_agent NOT LIKE '%SH-05F%' AND -- disney_mobile_sh_05_f
   user_agent NOT LIKE '%SBM203SH%' AND -- aquos_xx_203_sh
   user_agent NOT LIKE '%F-10D%' AND -- arrows_x_f_10_d
   user_agent NOT LIKE '%SBM203SH%' AND -- aquos_xx_203_sh
   user_agent NOT LIKE '%SBM302SH%' AND -- aquos_xx_302_sh
+  user_agent NOT LIKE '%SBM303SH%' AND -- aquos_xx_mini_303_sh
+
   user_agent NOT LIKE '%F-05D%' AND -- arrows_x_lte_f_05_d
   user_agent NOT LIKE '%lenovo%' AND -- lenovo
   user_agent NOT LIKE '%SM-G900P%' AND -- samsung_sm_g_900_p
+  user_agent NOT LIKE '%SM-G920F%' AND -- samsung_sm_g_920_f
   user_agent NOT LIKE '%SH-07D%' AND -- aquos_sh_07_d
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
-  user_agent NOT LIKE '%%' AND -- 
+  user_agent NOT LIKE '%304SH%' AND -- aquos_xx_304_sh
+  user_agent NOT LIKE '%305SH%' AND -- aquos_crystal_305_sh
+  user_agent NOT LIKE '%R7005%' AND -- other
+  user_agent NOT LIKE '%N-06E%' AND -- medias_x_n_06_e
+  user_agent NOT LIKE '%N-04D%' AND -- medias_lte_n_04_d
+
+  user_agent NOT LIKE '%L-02D%' AND -- prada_lg_l_02_d
+  user_agent NOT LIKE '%FJL22%' AND -- arrows_z_fjl_22
+  user_agent NOT LIKE '%K00G%' AND -- other
+  user_agent NOT LIKE '%SH-M01%' AND -- other
+  user_agent NOT LIKE '%KYL22%' AND -- digno_m_kyl_22
+  user_agent NOT LIKE '%PLUS%' -- other
 GROUP BY
   user_agent;
 
 -- test:キャリアできない
 SELECT
-  career,
-  COUNT(career)
+  career
 FROM(
   SELECT
     CASE 
