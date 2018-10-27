@@ -11,7 +11,7 @@ FROM
       -- windows --
       WHEN user_agent LIKE '%Windows NT 5.0%' THEN 'windows_2000'
       WHEN user_agent LIKE '%Windows NT 5.1%' THEN 'windows_xp'
-      WHEN user_agent LIKE '%Windows NT 5.2%' THEN 'windows_xp.64'
+      WHEN user_agent LIKE '%Windows NT 5.2%' THEN 'windows_xp_64'
       WHEN user_agent LIKE '%Windows NT 6.0%' THEN 'windows_vista'
       WHEN user_agent LIKE '%Windows NT 6.1%' THEN 'windows_7'
       WHEN user_agent LIKE '%Windows NT 6.2%' THEN 'windows_8'
@@ -94,14 +94,510 @@ FROM
       WHEN user_agent LIKE '%iPad; CPU OS 3_1%' THEN 'ipad_3_1' 
       WHEN user_agent LIKE '%iPad; CPU OS 3_0%' THEN 'ipad_3_0' 
       WHEN user_agent LIKE '%iPad%' THEN 'ipad' -- 2つ変なのがある.
-      -- android --
-
-
-      -- other -- 
+      -- other phone -- 
       WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Windows Phone%' THEN 'windows_phone' 
       WHEN user_agent LIKE '%Mobile%' AND user_agent LIKE '%Gecko%' 
         AND user_agent LIKE '%Firefox%' AND user_agent NOT LIKE '%Android%' THEN 'firefox_os' 
       WHEN user_agent LIKE '%BB10%' AND user_agent LIKE '%Mobile%' THEN 'blackberry_10' 
+      -- android --
+      -- nexus --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 4%' THEN 'nexus_4'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 5%' THEN 'nexus_5'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 6%' THEN 'nexus_6'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 7%' THEN 'nexus_7'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%NEXUS7%' THEN 'nexus_7'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 8%' THEN 'nexus_8'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Nexus 9%' THEN 'nexus_9'
+      -- aquos -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%304SH%' THEN 'aquos_304sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%305SH%' THEN 'aquos_305sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%402SH%' THEN 'aquos_402sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%403SH%' THEN 'aquos_403sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%404SH%' THEN 'aquos_404sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%502SH%' THEN 'aquos_502sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%503SH%' THEN 'aquos_503sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%504SH%' THEN 'aquos_504sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%505SH%' THEN 'aquos_505sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%506SH%' THEN 'aquos_506sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%509SH%' THEN 'aquos_509sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%603SH%' THEN 'aquos_603sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%604SH%' THEN 'aquos_604sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%605SH%' THEN 'aquos_605sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%606SH%' THEN 'aquos_606sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%701SH%' THEN 'aquos_701sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%IS17SH%' THEN 'aquos_is17sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-M01%' THEN 'aquos_sh_m01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-M02%' THEN 'aquos_sh_m02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-M03%' THEN 'aquos_sh_m03'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-M04%' THEN 'aquos_sh_m04'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-M05%' THEN 'aquos_sh_m05'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-L02%' THEN 'aquos_sh_l02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-01F%' THEN 'aquos_sh_01f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-01G%' THEN 'aquos_sh_01g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-01H%' THEN 'aquos_sh_01h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-01K%' THEN 'aquos_sh_01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-02E%' THEN 'aquos_sh_02e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-02F%' THEN 'aquos_sh_02f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-02H%' THEN 'aquos_sh_02h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-02J%' THEN 'aquos_sh_02j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-03G%' THEN 'aquos_sh_03g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-03J%' THEN 'aquos_sh_03j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-03J%' THEN 'aquos_sh_03j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-04E%' THEN 'aquos_sh_04e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-04F%' THEN 'aquos_sh_04f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-04G%' THEN 'aquos_sh_04g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-04H%' THEN 'aquos_sh_04h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-05G%' THEN 'aquos_sh_05g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-06E%' THEN 'aquos_sh_06e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-06F%' THEN 'aquos_sh_06f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-07D%' THEN 'aquos_sh_07d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-08E%' THEN 'aquos_sh_08e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHL21%' THEN 'aquos_shl21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHL22%' THEN 'aquos_shl22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHL23%' THEN 'aquos_shl23'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHL24%' THEN 'aquos_shl24'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHL25%' THEN 'aquos_shl25'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV31%' THEN 'aquos_shv31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV32%' THEN 'aquos_shv32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV33%' THEN 'aquos_shv33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV34%' THEN 'aquos_shv34'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV35%' THEN 'aquos_shv35'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV36%' THEN 'aquos_shv36'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV37%' THEN 'aquos_shv37'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV38%' THEN 'aquos_shv38'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV39%' THEN 'aquos_shv39'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV40%' THEN 'aquos_shv40'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHV41%' THEN 'aquos_shv41'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SHT22%' THEN 'aquos_sht22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SBM106SH%' THEN 'aquos_106sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SBM203SH%' THEN 'aquos_203sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SBM205SH%' THEN 'aquos_205sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SBM302SH%' THEN 'aquos_302sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SBM303SH%' THEN 'aquos_303sh'
+      -- xperia -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%401SO%' THEN 'xperia_401so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%402SO%' THEN 'xperia_402so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%501SO%' THEN 'xperia_501so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%502SO%' THEN 'xperia_502so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%601SO%' THEN 'xperia_601so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%602SO%' THEN 'xperia_602so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%701SO%' THEN 'xperia_701so'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL21%' THEN 'xperia_sol21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL22%' THEN 'xperia_sol22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL23%' THEN 'xperia_sol23'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL24%' THEN 'xperia_sol24'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL25%' THEN 'xperia_sol25'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOL26%' THEN 'xperia_sol26'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV31%' THEN 'xperia_sov31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV32%' THEN 'xperia_sov32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV33%' THEN 'xperia_sov33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV34%' THEN 'xperia_sov34'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV35%' THEN 'xperia_sov35'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOV36%' THEN 'xperia_sov36'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SOT21%' THEN 'xperia_sot21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%D5503%' THEN 'xperia_d5503'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%D5788%' THEN 'xperia_d5788'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%D6503%' THEN 'xperia_d6503'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%E2115%' THEN 'xperia_e2115'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%E5823%' THEN 'xperia_e5823'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F5122%' THEN 'xperia_f5122'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F8332%' THEN 'xperia_f8332'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%G8188%' THEN 'xperia_g8188'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Sony Tablet S%' THEN 'xperia_so_01b_s'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Sony Tablet P%' THEN 'xperia_so_01b_p'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP311%' THEN 'xperia_sgp311'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP312%' THEN 'xperia_sgp312'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP412%' THEN 'xperia_sgp412'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP511%' THEN 'xperia_sgp511'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP512%' THEN 'xperia_sgp512'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP611%' THEN 'xperia_sgp611'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP612%' THEN 'xperia_sgp612'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGP712%' THEN 'xperia_sgp712'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SGPT12%' THEN 'xperia_sgpt12'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01E%' THEN 'xperia_so_01e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01F%' THEN 'xperia_so_01f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01G%' THEN 'xperia_so_01g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01H%' THEN 'xperia_so_01h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01J%' THEN 'xperia_so_01j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-01K%' THEN 'xperia_so_01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02E%' THEN 'xperia_so_02e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02F%' THEN 'xperia_so_02f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02G%' THEN 'xperia_so_02g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02H%' THEN 'xperia_so_02h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02J%' THEN 'xperia_so_02j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-02K%' THEN 'xperia_so_02k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03D%' THEN 'xperia_so_03d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03E%' THEN 'xperia_so_03e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03F%' THEN 'xperia_so_03f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03G%' THEN 'xperia_so_03g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03H%' THEN 'xperia_so_03h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-03J%' THEN 'xperia_so_03j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04D%' THEN 'xperia_so_04d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04E%' THEN 'xperia_so_04e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04F%' THEN 'xperia_so_04f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04G%' THEN 'xperia_so_04g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04H%' THEN 'xperia_so_04h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-04J%' THEN 'xperia_so_04j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-05F%' THEN 'xperia_so_05f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-05G%' THEN 'xperia_so_05g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SO-06D%' THEN 'xperia_so_06d'
+      -- galaxy --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCL22%' THEN 'galaxy_scl22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCL23%' THEN 'galaxy_scl23'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCL24%' THEN 'galaxy_scl24'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV31%' THEN 'galaxy_scv31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV32%' THEN 'galaxy_scv32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV33%' THEN 'galaxy_scv33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV34%' THEN 'galaxy_scv34'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV36%' THEN 'galaxy_scv36'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCV37%' THEN 'galaxy_scv37'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-01D%' THEN 'galaxy_sc_01d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-01E%' THEN 'galaxy_sc_01e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-01F%' THEN 'galaxy_sc_01f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-01G%' THEN 'galaxy_sc_01g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-01K%' THEN 'galaxy_sc_01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-02E%' THEN 'galaxy_sc_02e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-02F%' THEN 'galaxy_sc_02f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-02G%' THEN 'galaxy_sc_02g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-02H%' THEN 'galaxy_sc_02h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-02J%' THEN 'galaxy_sc_02j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-03D%' THEN 'galaxy_sc_03d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-03E%' THEN 'galaxy_sc_03e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-03G%' THEN 'galaxy_sc_03g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-03J%' THEN 'galaxy_sc_03j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-04E%' THEN 'galaxy_sc_04e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-04F%' THEN 'galaxy_sc_04f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-04G%' THEN 'galaxy_sc_04g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-04J%' THEN 'galaxy_sc_04j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-05D%' THEN 'galaxy_sc_05d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-05G%' THEN 'galaxy_sc_05g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SC-06D%' THEN 'galaxy_sc_06d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%403SC%' THEN 'galaxy_403sc'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ISW11SC%' THEN 'galaxy_isw11sc'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Galaxy Nexus%' THEN 'galaxy_nexus'
+      -- arrows --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%M01%' THEN 'arrows_m01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%M02%' THEN 'arrows_m02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%RM02%' THEN 'arrows_rm02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FJT21%' THEN 'arrows_fjt21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FJL22%' THEN 'arrows_fjl22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%arrowsM03%' THEN 'arrows_m03'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%arrowsM04%' THEN 'arrows_m04'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%101F%' THEN 'arrows_101f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%202F%' THEN 'arrows_202f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%301F%' THEN 'arrows_301f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-01D%' THEN 'arrows_f_01d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-01F%' THEN 'arrows_f_01f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-01H%' THEN 'arrows_f_01h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-01J%' THEN 'arrows_f_01j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-01K%' THEN 'arrows_f_01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-02E%' THEN 'arrows_f_02e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-02F%' THEN 'arrows_f_02f' 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-02G%' THEN 'arrows_f_02g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-02H%' THEN 'arrows_f_02h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-03G%' THEN 'arrows_f_03g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-03H%' THEN 'arrows_f_03h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-04E%' THEN 'arrows_f_04e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-04G%' THEN 'arrows_f_04g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-04H%' THEN 'arrows_f_04h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-05D%' THEN 'arrows_f_05d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-05E%' THEN 'arrows_f_05e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-05F%' THEN 'arrows_f_05f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-05J%' THEN 'arrows_f_05j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-06E%' THEN 'arrows_f_06e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-10D%' THEN 'arrows_f_10d'
+
+      -- disney --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-02G%' THEN 'disney_mobile_sh_02g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-04F%' THEN 'disney_mobile_sh_04f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SH-05F%' THEN 'disney_mobile_sh_05f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-03E%' THEN 'disney_mobile_n_03e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%F-03F%' THEN 'disney_mobile_f_03f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DM-01G%' THEN 'disney_mobile_dm_01g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DM-01H%' THEN 'disney_mobile_dm_01h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DM-01J%' THEN 'disney_mobile_dm_01j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DM-01K%' THEN 'disney_mobile_dm_01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DM-02H%' THEN 'disney_mobile_dm_02h'
+      -- samsung --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-T800%' THEN 'samsung_sm_t800'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-G5308W%' THEN 'samsung_sm_g5308w'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-N9108V%' THEN 'samsung_sm_n9108v'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-G7108V%' THEN 'samsung_sm_g7108v'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-G900P%' THEN 'samsung_sm_g900p'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-G920F%' THEN 'samsung_sm_g920f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SM-G935P%' THEN 'samsung_sm_g935p'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SCH-I535%' THEN 'samsung_sch_i535'
+      -- digno -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%WX10K%' THEN 'digno_wk10k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYL22%' THEN 'digno_kyl22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYL21%' THEN 'digno_kyl21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%302KC%' THEN 'digno_302kc'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%503KC%' THEN 'digno_503kc'
+      -- medias -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-04D%' THEN 'medias_n_04d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-05D%' THEN 'medias_n_05d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-06D%' THEN 'medias_n_06d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-06E%' THEN 'medias_n_06e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%N-08D%' THEN 'medias_n_08d'
+      -- optimus --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-02E%' THEN 'optimus_l_02e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-04E%' THEN 'optimus_l_04e'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-05D%' THEN 'optimus_l_05d'
+      -- eluga --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P-06D%' THEN 'eluga_p_06d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P-07D%' THEN 'eluga_p_07d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P-08D%' THEN 'eluga_p_08d'
+      -- htl --      
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTL21%' THEN 'j_htl21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTL22%' THEN 'j_htl22'
+      -- kindle fire --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFGIWI%' THEN 'kindle_fire_kfgiwi'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFAUWI%' THEN 'kindle_fire_keauwi'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFTT%' THEN 'kindle_fire_kftt'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFFOWI%' THEN 'kindle_fire_kffowi'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFDOWI%' THEN 'kindle_fire_kfdowi'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KFTHWI%' THEN 'kindel_fire_kfthwi'
+      -- huawei -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI VNS-L22%' THEN 'huawei_vns_l22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI VNS-L52%' THEN 'huawei_vns_l52'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI SCL-L02%' THEN 'huawei_scl_l02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI P7-L10%' THEN 'huawei_p7_l10'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI CAN-L12%' THEN 'huawei_can_l12'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI KII-L22%' THEN 'huawei_kii_l22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI MT7-J1%' THEN 'huawei_mt7_j1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI P8max%' THEN 'huawei_p8max'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI G6-L22%' THEN 'huawei_g6_l22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI M2-802L%' THEN 'huawei_m2_802l'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HUAWEI608HW%' THEN 'huawei_608hw'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ALE-L02%' THEN 'huawei_ale_l02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%G621-TL00%' THEN 'huawei_g621_tl00'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%G620S-L02%' THEN 'huawei_g620s_l02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PLE-701L%' THEN 'huawei_ple_701l'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FRD-L02%' THEN 'huawei_frd_l02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MHA-L29%' THEN 'huawei_mha_l29'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HDN-W09%' THEN 'huawei_hdn_w09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PRA-LX2%' THEN 'huawei_pra_lx2'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%VKY-L29%' THEN 'huawei_vky_l29'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FIG-LA1%' THEN 'huawei_fig_la1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BAH-W09%' THEN 'huawei_bah_w09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%EVA-L09%' THEN 'huawei_eva_l09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PE-TL10%' THEN 'huawei_pe_tl10'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PE-UL00%' THEN 'huawei_pe_ul00'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PLK-AL10%' THEN 'huawei_plk_al10'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BGO-DL09%' THEN 'huawei_bgo_dl09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FDR-A01w%' THEN 'huawei_fdr_a01w'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HWT31%' THEN 'huawei_hwt31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MediaPad 7 Youth%' THEN 'huawei_mediapad_7'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MediaPad M1 8.0%' THEN 'huawei_mediapad_8'
+      -- media_pad --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%403HW%' THEN 'mediapad_403hw'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%606HW%' THEN 'mediapad_606hw'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BTV-W09%' THEN 'mediapad_btv_w09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KOB-W09%' THEN 'mediapad_kob_w09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BTV-DL09%' THEN 'mediapad_btv_dl09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%CPN-W09%' THEN 'mediapad_cpn_w09'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%JDN-L01%' THEN 'mediapad_jdn_l01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%JDN-W09%' THEN 'mediapad_jdm_w09'
+      -- asus -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K00G%' THEN 'asus_k00g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K00F%' THEN 'asus_k00f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K00R%' THEN 'asus_k00r'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K010%' THEN 'asus_k010'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K011%' THEN 'asus_k011'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K013%' THEN 'asus_k013'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K017%' THEN 'asus_k017'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P002%' THEN 'asus_p002'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P008%' THEN 'asus_p008'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P023%' THEN 'asus_p023'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P01W%' THEN 'asus_p01w'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P01Z%' THEN 'asus_p01z'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P00A%' THEN 'asus_p00a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P024%' THEN 'asus_p024'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P028%' THEN 'asus_p028'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P01MA%' THEN 'asus_p01ma'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%P01T_1%' THEN 'asus_p01t_1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ME301T%' THEN 'asus_me301t'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ME173X%' THEN 'asus_me173x'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%AST21%' THEN 'asus_ast21'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z017DA%' THEN 'asus_z017da'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_T00P%' THEN 'asus_t00p'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z00AD%' THEN 'asus_z00ad'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z00ED%' THEN 'asus_z00ed'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_X013DB%' THEN 'asus_x013db'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_X00DDA%' THEN 'asus_x00dda'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_X008DB%' THEN 'asus_x008db'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z01BDA%' THEN 'asus_z01bda'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z010DB%' THEN 'asus_z010db'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z01KDA%' THEN 'asus_z01kda'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_X00HD%' THEN 'asus_x00hd'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z00UD%' THEN 'asus_z00ud'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_A007%' THEN 'asus_a007'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z012DA%' THEN 'asus_z012da'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_Z01FD%' THEN 'asus_z10fd'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_A002%' THEN 'asus_a002'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ASUS_P00I%' THEN 'asus_p00i'
+      -- sharp --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%X1%' THEN 'sharp_x1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%S1%' THEN 'sharp_s1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%507SH%' THEN 'sharp_507sh'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%S3-SH%' THEN 'sharp_s3_sh'
+      -- dtab -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%d-01G%' THEN 'dtab_d_01g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%d-01J%' THEN 'dtab_d_01j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%d-01H%' THEN 'dtab_d_01h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%d-02H%' THEN 'dtab_d_02h'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%dtab01%' THEN 'dtab_b01'
+      -- vaio --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%VPA051%' THEN 'vaio_vpa051'
+      -- urbano --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV31%' THEN 'urbano_kyv31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV32%' THEN 'urbano_kyv32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV33%' THEN 'urbano_kyv33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV34%' THEN 'urbano_kyv34'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV40U%' THEN 'urbano_kyv40u'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV42%' THEN 'urbano_kyv42'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYY22%' THEN 'urbano_kyy22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYY23%' THEN 'urbano_kyy23'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYY24%' THEN 'urbano_kyy24'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%URBANO PROGRESSO%' THEN 'urbano_progresso'
+      -- kyosera -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYT31%' THEN 'kyosera_kyt31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV35%' THEN 'kyosera_kyv35'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV36%' THEN 'kyosera_kyv36'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KYV37%' THEN 'kyosera_kyv37'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KC-S301AE%' THEN 'kyosera_kc_s301ae'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KC-01%' THEN 'kyosera_kc_01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%KCP01K%' THEN 'kyosera_kcp01k'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%S4-KC%' THEN 'kyosera_s4_kc'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%S2%' THEN 'kyosera_s2'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%404KC%' THEN 'kyosera_404kc'
+      -- LG --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LG-V480%' THEN 'lg_v480'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LG-D620%' THEN 'lg_d620'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGS01%' THEN 'lg_so1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGS02%' THEN 'lg_so2'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-02D%' THEN 'lg_02d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-01F%' THEN 'lg_01f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%L-01J%' THEN 'lg_01j'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGL22%' THEN 'lg_lgl22'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGL24%' THEN 'lg_lgl24'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGT01%' THEN 'lg_lgt01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGT02%' THEN 'lg_lgt02'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGT31%' THEN 'lg_lgt31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGT32%' THEN 'lg_lgt32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGV31%' THEN 'lg_lgv31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGV32%' THEN 'lg_lgv32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGV33%' THEN 'lg_lgv33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGV34%' THEN 'lg_lgv34'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%LGV35%' THEN 'lg_lgv35'
+      -- lenovo --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%lenovo%' THEN 'lenovo'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Lenovo B6000-F%' THEN 'lenovo_b6000_f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Lenovo B8000-F%' THEN 'lenovo_b8000_f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Lenovo TAB 2 A10-70L%' THEN 'lenovo_a10_70l'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Lenovo YT3-X50F%' THEN 'lenovo_yt3_x50f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%YOGA Tablet 2-1050L%' THEN 'lenovo_2_1050l'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%YOGA Tablet 2-830F%' THEN 'lenovo_2_830f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%YOGA Tablet 2-830L%' THEN 'lenovo_2_830l'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%501LV%' THEN 'lenovo_501lv'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%601LV%' THEN 'lenovo_601lv'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%602LV%' THEN 'lenovo_602lv'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A700%' THEN 'lenovo_a700'
+      -- mono -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MO-01J%' THEN 'mono_mo_01j'
+      -- zte --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BLADE E01%' THEN 'zte_e01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BLADE V580%' THEN 'zte_v580'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Blade V580%' THEN 'zte_v580'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BLADE A521%' THEN 'zte_a521'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A2017G%' THEN 'zte_a2017g'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%T660%' THEN 'zte_t660'
+      -- NEC -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PC-TS708T1W%' THEN 'nec_ts708t1w'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PC-TE508S1%' THEN 'nec_te508s1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PC-TE508BAW%' THEN 'nec_te508baw'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PC-TE307N1W%' THEN 'nec_te307n1w'
+      -- HTC -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ISW12HT%' THEN 'htc_isw12ht'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTV31%' THEN 'htv_htv31'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTV32%' THEN 'htv_htv32'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTV33%' THEN 'htv_htv33'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HTL23%' THEN 'htv_htl23'
+      -- MOTO --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Moto G%' THEN 'motorola_g5'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%201M%' THEN 'motorola_201m'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%XT1562%' THEN 'motorola_xt1562'
+      -- goo -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%g06%' THEN 'goo_g06'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%CP-J55a%' THEN 'goo_g07'
+      -- FREETEL -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FT142A%' THEN 'freetel_142a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FTJ152B%' THEN 'freetel_152b'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FTJ161B%' THEN 'freetel_161b'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FTJ162D%' THEN 'freetel_162d'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FTJ162E%' THEN 'freetel_162e'
+      -- TOSHIBA -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%AT7-B%' THEN 'toshiba_at7_b'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%AT374%' THEN 'toshiba_at374'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A204%' THEN 'toshiba_a204'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A205%' THEN 'toshiba_a205'
+      -- ALCATEL -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HT16Pro%' THEN 'alcatel_ht16pro'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%6045F%' THEN 'alcatel_6045f'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%6055D%' THEN 'alcatel_6055d'
+      -- HOMTOM --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HT16Pro%' THEN 'homtom_ht16pro'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%HT3 Pro%' THEN 'homtom_ht3pro'
+      -- Xiaomi --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MI 5%' THEN 'xiaomi_mi_5'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Redmi 4X%' THEN 'xiaomi_4x'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Redmi Pro Build/MRA58K%' THEN 'xiaomi_mra58k'
+      -- Onda -- 
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Vido-W7-BS%' THEN 'onda_w7_bs'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%V919 Air DualOS%' THEN 'onda_v919'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ONDA MID Build%' THEN 'onda_mid_build'
+      -- BLUEDOT --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BNT-791%' THEN 'bluedot_bnt_791'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%BNT-71%' THEN 'bluedot_bnt_71'
+      -- CLIDE --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%TA70CA2%' THEN 'clide_ta70ca2'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%TM105A%' THEN 'clide_tm105a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%TM75A%' THEN 'clide_tm75a'
+      -- Priori
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FTJ152A%' THEN 'priori_ftj152a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FT151A%' THEN 'priori_ft151a'
+      -- other --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A94GT-B_A94GT-W%' THEN 'alphaling_a94gt'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%R7005%' THEN 'oppo_r3_r7005'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%CP-B43%' THEN 'covia_cp_b_43'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%SKT01%' THEN 'torque_skt_01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FXC-5A%' THEN 'geanee_fxc_5a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%DMC-CM1%' THEN 'lumix_dmc_cm1'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%WAS-LX2J%' THEN 'p_10_lite'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%EveryPad2%' THEN 'everypad2'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%EveryPad%' THEN 'everypad'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%AD971JT%' THEN 'rockchip_ad971jt'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%K01A%' THEN 'balmuda_k01a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%ADP-722A%' THEN 'adp_722a'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%TONE m15%' THEN 'tone_m15'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%EP172BZ%' THEN 'everyphone_ep172bz'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MD-01P%' THEN 'mode_01p'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%VS-AIR700%' THEN 'vs_air700'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%B1-760HD%' THEN 'iconia_b1_760hd'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Coolpad Y70-C%' THEN 'coolpad_y70_c'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%X20L%' THEN 'doogee_x20l'
+      -- unknown --
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%PLUS%' THEN 'plus'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%T01%' THEN 't01'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%MOMO9%' THEN 'momo9'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%NEO%' THEN 'neo'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Kurio7S%' THEN 'kurio_7s'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%TPB116%' THEN 'tpb116'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Vido-W7-BS%' THEN 'vido_w7_bs'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%A777MK%' THEN 'a777mk'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%NW-Z1000Series%' THEN 'nw_z1000'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%FAR7%' THEN 'far7'
+      WHEN user_agent LIKE '%Android%' AND user_agent LIKE '%Metal_Tablet_10%' THEN 'metal_tablet_10'
       ELSE 'other'
     END AS os
   FROM
@@ -109,349 +605,3 @@ FROM
   ) AS t1
 GROUP BY
   t1.os;
-
--- test: 機種 スマホ
-SELECT
-  user_agent
-FROM 
-  processed.t_weblog
-WHERE
-  user_agent LIKE '%Android%' AND user_agent LIKE '%KYV%' AND
-  -- nexus --
-  user_agent NOT LIKE '%Nexus 4%' AND -- nexus_4
-  user_agent NOT LIKE '%Nexus 5%' AND -- nexus_5
-  user_agent NOT LIKE '%Nexus 6%' AND -- nexus_6
-  user_agent NOT LIKE '%Nexus 7%' AND -- nexus_7
-  -- aquos -- 
-  user_agent NOT LIKE '%304SH%' AND -- aquos_304sh
-  user_agent NOT LIKE '%305SH%' AND -- aquos_305sh
-  user_agent NOT LIKE '%402SH%' AND -- aquos_402sh
-  user_agent NOT LIKE '%403SH%' AND -- aquos_403sh
-  user_agent NOT LIKE '%404SH%' AND -- aquos_404sh
-  user_agent NOT LIKE '%502SH%' AND -- aquos_502sh
-  user_agent NOT LIKE '%503SH%' AND -- aquos_503sh
-  user_agent NOT LIKE '%504SH%' AND -- aquos_504sh
-  user_agent NOT LIKE '%505SH%' AND -- aquos_505sh
-  user_agent NOT LIKE '%506SH%' AND -- aquos_506sh
-  user_agent NOT LIKE '%509SH%' AND -- aquos_509sh
-  user_agent NOT LIKE '%603SH%' AND -- aquos_603sh
-  user_agent NOT LIKE '%604SH%' AND -- aquos_604sh
-  user_agent NOT LIKE '%605SH%' AND -- aquos_605sh
-  user_agent NOT LIKE '%606SH%' AND -- aquos_606sh
-  user_agent NOT LIKE '%701SH%' AND -- aquos_701sh
-  user_agent NOT LIKE '%IS17SH%' AND -- aquos_is17sh
-  user_agent NOT LIKE '%SH-M01%' AND -- aquos_sh_m01
-  user_agent NOT LIKE '%SH-M02%' AND -- aquos_sh_m02
-  user_agent NOT LIKE '%SH-M03%' AND -- aquos_sh_m03
-  user_agent NOT LIKE '%SH-M04%' AND -- aquos_sh_m04
-  user_agent NOT LIKE '%SH-M05%' AND -- aquos_sh_m05
-  user_agent NOT LIKE '%SH-L02%' AND -- aquos_sh_l02
-  user_agent NOT LIKE '%SH-01F%' AND -- aquos_sh_01f
-  user_agent NOT LIKE '%SH-01G%' AND -- aquos_sh_01g
-  user_agent NOT LIKE '%SH-01H%' AND -- aquos_sh_01h
-  user_agent NOT LIKE '%SH-01K%' AND -- aquos_sh_01k
-  user_agent NOT LIKE '%SH-02E%' AND -- aquos_sh_02e
-  user_agent NOT LIKE '%SH-02F%' AND -- aquos_sh_02f
-  user_agent NOT LIKE '%SH-02H%' AND -- aquos_sh_02h
-  user_agent NOT LIKE '%SH-02J%' AND -- aquos_sh_02j
-  user_agent NOT LIKE '%SH-03G%' AND -- aquos_sh_03g
-  user_agent NOT LIKE '%SH-03J%' AND -- aquos_sh_03j
-  user_agent NOT LIKE '%SH-03J%' AND -- aquos_sh_03j
-  user_agent NOT LIKE '%SH-04E%' AND -- aquos_sh_04e
-  user_agent NOT LIKE '%SH-04F%' AND -- aquos_sh_04f
-  user_agent NOT LIKE '%SH-04G%' AND -- aquos_sh_04g
-  user_agent NOT LIKE '%SH-04H%' AND -- aquos_sh_04h
-  user_agent NOT LIKE '%SH-05G%' AND -- aquos_sh_05g
-  user_agent NOT LIKE '%SH-06E%' AND -- aquos_sh_06e
-  user_agent NOT LIKE '%SH-06F%' AND -- aquos_sh_06f
-  user_agent NOT LIKE '%SH-07D%' AND -- aquos_sh_07d
-  user_agent NOT LIKE '%SH-08E%' AND -- aquos_sh_08e
-  user_agent NOT LIKE '%SHL21%' AND -- aquos_shl21
-  user_agent NOT LIKE '%SHL22%' AND -- aquos_shl22
-  user_agent NOT LIKE '%SHL23%' AND -- aquos_shl23
-  user_agent NOT LIKE '%SHL24%' AND -- aquos_shl24
-  user_agent NOT LIKE '%SHL25%' AND -- aquos_shl25
-  user_agent NOT LIKE '%SHV31%' AND -- aquos_shv31
-  user_agent NOT LIKE '%SHV32%' AND -- aquos_shv32
-  user_agent NOT LIKE '%SHV33%' AND -- aquos_shv33
-  user_agent NOT LIKE '%SHV34%' AND -- aquos_shv34
-  user_agent NOT LIKE '%SHV35%' AND -- aquos_shv35
-  user_agent NOT LIKE '%SHV36%' AND -- aquos_shv36
-  user_agent NOT LIKE '%SHV37%' AND -- aquos_shv37
-  user_agent NOT LIKE '%SHV38%' AND -- aquos_shv38
-  user_agent NOT LIKE '%SHV39%' AND -- aquos_shv39
-  user_agent NOT LIKE '%SHV40%' AND -- aquos_shv40
-  user_agent NOT LIKE '%SHV41%' AND -- aquos_shv41
-  user_agent NOT LIKE '%SHT22%' AND -- aquos_sht22
-  user_agent NOT LIKE '%SBM106SH%' AND -- aquos_106sh
-  user_agent NOT LIKE '%SBM203SH%' AND -- aquos_203sh
-  user_agent NOT LIKE '%SBM205SH%' AND -- aquos_205sh
-  user_agent NOT LIKE '%SBM302SH%' AND -- aquos_302sh
-  user_agent NOT LIKE '%SBM303SH%' AND -- aquos_303sh
-
-  -- xperia -- 
-  user_agent NOT LIKE '%501SO%' AND -- xperia_501so
-  user_agent NOT LIKE '%601SO%' AND -- xperia_601so
-  user_agent NOT LIKE '%602SO%' AND -- xperia_602so
-  user_agent NOT LIKE '%SOL24%' AND -- xperia_sol24
-  user_agent NOT LIKE '%SOL26%' AND -- xperia_sol26
-  user_agent NOT LIKE '%SOV31%' AND -- xperia_sov31
-  user_agent NOT LIKE '%SOV32%' AND -- xperia_sov32
-  user_agent NOT LIKE '%SOV33%' AND -- xperia_sov33
-  user_agent NOT LIKE '%SOV34%' AND -- xperia_sov34
-  user_agent NOT LIKE '%SOV35%' AND -- xperia_sov35
-  user_agent NOT LIKE '%SOV36%' AND -- xperia_sov36
-  user_agent NOT LIKE '%SO-01E%' AND -- xperia_so_01e
-  user_agent NOT LIKE '%SO-01F%' AND -- xperia_so_01f
-  user_agent NOT LIKE '%SO-01G%' AND -- xperia_so_01g
-  user_agent NOT LIKE '%SO-01H%' AND -- xperia_so_01h
-  user_agent NOT LIKE '%SO-01J%' AND -- xperia_so_01j
-  user_agent NOT LIKE '%SO-01K%' AND -- xperia_so_01k
-  user_agent NOT LIKE '%SO-02E%' AND -- xperia_so_02e
-  user_agent NOT LIKE '%SO-02G%' AND -- xperia_so_02g
-  user_agent NOT LIKE '%SO-02H%' AND -- xperia_so_02h
-  user_agent NOT LIKE '%SO-02J%' AND -- xperia_so_02j
-  user_agent NOT LIKE '%SO-02K%' AND -- xperia_so_02k
-  user_agent NOT LIKE '%SO-03D%' AND -- xperia_so_03d
-  user_agent NOT LIKE '%SO-03F%' AND -- xperia_so_03f
-  user_agent NOT LIKE '%SO-03G%' AND -- xperia_so_03g
-  user_agent NOT LIKE '%SO-03H%' AND -- xperia_so_03h
-  user_agent NOT LIKE '%SO-03J%' AND -- xperia_so_03j
-  user_agent NOT LIKE '%SO-04D%' AND -- xperia_so_04d
-  user_agent NOT LIKE '%SO-04E%' AND -- xperia_so_04e
-  user_agent NOT LIKE '%SO-04F%' AND -- xperia_so_04f
-  user_agent NOT LIKE '%SO-04G%' AND -- xperia_so_04g
-  user_agent NOT LIKE '%SO-04H%' AND -- xperia_so_04h
-  user_agent NOT LIKE '%SO-04J%' AND -- xperia_so_04j
-  user_agent NOT LIKE '%SO-05G%' AND -- xperia_so_05g
-  user_agent NOT LIKE '%SO-06D%' AND -- xperia_so_06d
-
-  -- galaxy --
-  user_agent NOT LIKE '%SCL22%' AND -- galaxy_scl22
-  user_agent NOT LIKE '%SCL23%' AND -- galaxy_scl23
-  user_agent NOT LIKE '%SCL24%' AND -- galaxy_scl24
-  user_agent NOT LIKE '%SCV31%' AND -- galaxy_scv31
-  user_agent NOT LIKE '%SCV32%' AND -- galaxy_scv32
-  user_agent NOT LIKE '%SCV33%' AND -- galaxy_scv33
-  user_agent NOT LIKE '%SCV34%' AND -- galaxy_scv34
-  user_agent NOT LIKE '%SCV36%' AND -- galaxy_scv36
-  user_agent NOT LIKE '%SCV37%' AND -- galaxy_scv37
-  user_agent NOT LIKE '%SC-01D%' AND -- galaxy_sc_01d
-  user_agent NOT LIKE '%SC-01E%' AND -- galaxy_sc_01e
-  user_agent NOT LIKE '%SC-01F%' AND -- galaxy_sc_01f
-  user_agent NOT LIKE '%SC-01G%' AND -- galaxy_sc_01g
-  user_agent NOT LIKE '%SC-01K%' AND -- galaxy_sc_01k
-  user_agent NOT LIKE '%SC-02E%' AND -- galaxy_sc_02e
-  user_agent NOT LIKE '%SC-02F%' AND -- galaxy_sc_02f
-  user_agent NOT LIKE '%SC-02G%' AND -- galaxy_sc_02g
-  user_agent NOT LIKE '%SC-02H%' AND -- galaxy_sc_02h
-  user_agent NOT LIKE '%SC-02J%' AND -- galaxy_sc_02j
-  user_agent NOT LIKE '%SC-03D%' AND -- galaxy_sc_03d
-  user_agent NOT LIKE '%SC-03E%' AND -- galaxy_sc_03e
-  user_agent NOT LIKE '%SC-03G%' AND -- galaxy_sc_03g
-  user_agent NOT LIKE '%SC-03J%' AND -- galaxy_sc_03j
-  user_agent NOT LIKE '%SC-04E%' AND -- galaxy_sc_04e
-  user_agent NOT LIKE '%SC-04F%' AND -- galaxy_sc_04f
-  user_agent NOT LIKE '%SC-04G%' AND -- galaxy_sc_04g
-  user_agent NOT LIKE '%SC-04J%' AND -- galaxy_sc_04j
-  user_agent NOT LIKE '%SC-05D%' AND -- galaxy_sc_05d
-  user_agent NOT LIKE '%SC-05G%' AND -- galaxy_sc_05g
-  user_agent NOT LIKE '%SC-06D%' AND -- galaxy_sc_06d
-  user_agent NOT LIKE '%403SC%' AND -- galaxy_403sc
-  user_agent NOT LIKE '%ISW11SC%' AND -- galaxy_isw_11sc
-  user_agent NOT LIKE '%Galaxy Nexus%' AND -- galaxy_nexus
-  -- arrows --
-  user_agent NOT LIKE '%M01%' AND -- arrows_m01
-  user_agent NOT LIKE '%RM02%' AND -- arrows_rm02
-  user_agent NOT LIKE '%FJL22%' AND -- arrows_fjl22
-  user_agent NOT LIKE '%arrowsM03%' AND -- arrows_m03
-  user_agent NOT LIKE '%101F%' AND -- arrows_101f
-  user_agent NOT LIKE '%202F%' AND -- arrows_202f
-  user_agent NOT LIKE '%301F%' AND -- arrows_301f
-  user_agent NOT LIKE '%F-01D%' AND -- arrows_f_01d
-  user_agent NOT LIKE '%F-01F%' AND -- arrows_f_01f
-  user_agent NOT LIKE '%F-01H%' AND -- arrows_f_01h
-  user_agent NOT LIKE '%F-01J%' AND -- arrows_f_01j
-  user_agent NOT LIKE '%F-01K%' AND -- arrows_f_01k
-  user_agent NOT LIKE '%F-02E%' AND -- arrows_f_02e
-  user_agent NOT LIKE '%F-02F%' AND -- arrows_f_02f  
-  user_agent NOT LIKE '%F-02G%' AND -- arrows_f_02g
-  user_agent NOT LIKE '%F-02H%' AND -- arrows_f_02h
-  user_agent NOT LIKE '%F-03G%' AND -- arrows_f_03g 
-  user_agent NOT LIKE '%F-03H%' AND -- arrows_f_03h
-  user_agent NOT LIKE '%F-04E%' AND -- arrows_f_04e
-  user_agent NOT LIKE '%F-04G%' AND -- arrows_f_04g
-  user_agent NOT LIKE '%F-04H%' AND -- arrows_f_04h
-  user_agent NOT LIKE '%F-05D%' AND -- arrows_f_05d
-  user_agent NOT LIKE '%F-05E%' AND -- arrows_f_05e
-  user_agent NOT LIKE '%F-05F%' AND -- arrows_f_05f
-  user_agent NOT LIKE '%F-05J%' AND -- arrows_f_05j
-  user_agent NOT LIKE '%F-06E%' AND -- arrows_f_06e
-  user_agent NOT LIKE '%F-10D%' AND -- arrows_f_10d
-
-  -- disney --
-  user_agent NOT LIKE '%SH-02G%' AND -- disney_mobile_sh_02g
-  user_agent NOT LIKE '%SH-04F%' AND -- disney_mobile_sh_04f
-  user_agent NOT LIKE '%SH-05F%' AND -- disney_mobile_sh_05f
-  user_agent NOT LIKE '%N-03E%' AND -- disney_mobile_n_03e
-  user_agent NOT LIKE '%F-03F%' AND -- disney_mobile_f_03f
-  user_agent NOT LIKE '%DM-01G%' AND -- disney_mobile_dm_01g
-  user_agent NOT LIKE '%DM-01H%' AND -- disney_mobile_dm_01h
-  user_agent NOT LIKE '%DM-01J%' AND -- disney_mobile_dm_01j
-  -- samsung --
-  user_agent NOT LIKE '%SM-T800%' AND -- samsung_sm_t800
-  user_agent NOT LIKE '%SM-G5308W%' AND -- samsung_sm_g5308w
-  user_agent NOT LIKE '%SM-N9108V%' AND -- samsung_sm_n9108v
-  user_agent NOT LIKE '%SM-G7108V%' AND -- samsung_sm_g7108v
-  user_agent NOT LIKE '%SM-G900P%' AND -- samsung_sm_g900p
-  user_agent NOT LIKE '%SM-G920F%' AND -- samsung_sm_g920f
-  user_agent NOT LIKE '%SM-G935P%' AND -- samsung_sm_g935p
-  user_agent NOT LIKE '%SCH-I535%' AND -- samsung_sch_i535
-  -- digno -- 
-  user_agent NOT LIKE '%WX10K%' AND -- digno_wk10k
-  user_agent NOT LIKE '%KYL22%' AND -- digno_kyl22
-  user_agent NOT LIKE '%KYL21%' AND -- digno_kyl21
-  user_agent NOT LIKE '%302KC%' AND -- digno_302kc
-  user_agent NOT LIKE '%503KC%' AND -- digno_503kc
-  -- medias -- 
-  user_agent NOT LIKE '%N-04D%' AND -- medias_n_04d
-  user_agent NOT LIKE '%N-05D%' AND -- medias_n_05d
-  user_agent NOT LIKE '%N-06D%' AND -- medias_n_06d
-  user_agent NOT LIKE '%N-06E%' AND -- medias_n_06e
-  user_agent NOT LIKE '%N-08D%' AND -- medias_n_08d
-
-  -- optimus --
-  user_agent NOT LIKE '%L-02E%' AND -- optimus_l_02e
-  user_agent NOT LIKE '%L-04E%' AND -- optimus_l_04e
-  user_agent NOT LIKE '%L-05D%' AND -- optimus_l_05d
-  -- eluga --
-  user_agent NOT LIKE '%P-06D%' AND -- eluga_p_06d
-  user_agent NOT LIKE '%P-07D%' AND -- eluga_p_07d
-  -- htl --  
-  user_agent NOT LIKE '%HTL21%' AND -- j_htl21
-  user_agent NOT LIKE '%HTL22%' AND -- j_htl22
-  -- kindle fire --
-  user_agent NOT LIKE '%KFGIWI%' AND -- kindle_fire_kfgiwi
-  user_agent NOT LIKE '%KFTT%' AND -- kindle_fire_kftt
-  -- huawei -- 
-  user_agent NOT LIKE '%HUAWEI VNS-L22%' AND -- huawei_vns_l22
-  user_agent NOT LIKE '%HUAWEI VNS-L52%' AND -- huawei_vns_l52
-  user_agent NOT LIKE '%HUAWEI SCL-L02%' AND -- huawei_scl_l02
-  user_agent NOT LIKE '%HUAWEI P7-L10%' AND -- huawei_p7_l10
-  user_agent NOT LIKE '%HUAWEI CAN-L12%' AND -- huawei_can_l12
-  user_agent NOT LIKE '%HUAWEI KII-L22%' AND -- huawei_kii_l22
-  user_agent NOT LIKE '%HUAWEI MT7-J1%' AND -- huawei_mt7_j1
-  user_agent NOT LIKE '%HUAWEI P8max%' AND -- huawei_p8max
-  user_agent NOT LIKE '%HUAWEI G6-L22%' AND -- huawei_g6_l22
-  user_agent NOT LIKE '%HUAWEI M2-802L%' AND -- huawei_m2_802l
-  user_agent NOT LIKE '%HUAWEI608HW%' AND -- huawei_608hw
-  user_agent NOT LIKE '%ALE-L02%' AND -- huawei_ale_l02
-  user_agent NOT LIKE '%G620S-L02%' AND -- huawei_g620s_l02
-  user_agent NOT LIKE '%PLE-701L%' AND -- huawei_ple_701l
-  user_agent NOT LIKE '%FRD-L02%' AND -- huawei_frd_l02
-  user_agent NOT LIKE '%MHA-L29%' AND -- huawei_mha_l29
-  user_agent NOT LIKE '%HDN-W09%' AND -- huawei_hdn_w09
-  user_agent NOT LIKE '%PRA-LX2%' AND -- huawei_pra_lx2
-  user_agent NOT LIKE '%VKY-L29%' AND -- huawei_vky_l29
-  user_agent NOT LIKE '%FIG-LA1%' AND -- huawei_fig_la1
-  user_agent NOT LIKE '%BAH-W09%' AND -- huawei_bah_w09
-  user_agent NOT LIKE '%EVA-L09%' AND -- huawei_eva_l09
-  -- media_pad --
-  user_agent NOT LIKE '%403HW%' AND -- mediapad_403hs
-  user_agent NOT LIKE '%BTV-W09%' AND -- mediapad_btv_w09
-  user_agent NOT LIKE '%KOB-W09%' AND -- mediapad_kob_w09
-  user_agent NOT LIKE '%BTV-DL09%' AND -- mediapad_btv_dl09
-  user_agent NOT LIKE '%CPN-W09%' AND -- mediapad_cpn_w09
-  user_agent NOT LIKE '%JDN-L01%' AND -- mediapad_jdn_l01
-  user_agent NOT LIKE '%JDN-W09%' AND -- mediapad_jdm_w09
-  -- asus -- 
-  user_agent NOT LIKE '%K00G%' AND -- asus_k00g
-  user_agent NOT LIKE '%P002%' AND -- asus_p002
-  user_agent NOT LIKE '%P024%' AND -- asus_p024
-  user_agent NOT LIKE '%P01T_1%' AND -- asus_p01t_1
-  user_agent NOT LIKE '%AST21%' AND -- asus_ast21
-  user_agent NOT LIKE '%ASUS_Z017DA%' AND -- asus_z017da
-  user_agent NOT LIKE '%ASUS_T00P%' AND -- asus_t00p
-  user_agent NOT LIKE '%ASUS_Z00AD%' AND -- asus_z00ad
-  user_agent NOT LIKE '%ASUS_Z00ED%' AND -- asus_z00ed
-  user_agent NOT LIKE '%ASUS_X013DB%' AND -- asus_x013db
-  user_agent NOT LIKE '%ASUS_X00DDA%' AND -- asus_x00dda
-  user_agent NOT LIKE '%ASUS_X008DB%' AND -- asus_x008db
-  user_agent NOT LIKE '%ASUS_Z01BDA%' AND -- asus_z01bda
-  user_agent NOT LIKE '%ASUS_Z010DB%' AND -- asus_z010db
-  user_agent NOT LIKE '%ASUS_Z01KDA%' AND -- asus_z01kda
-  user_agent NOT LIKE '%ASUS_X00HD%' AND -- asus_x00hd
-  user_agent NOT LIKE '%ASUS_Z00UD%' AND -- asus_z00ud
-  user_agent NOT LIKE '%ASUS_A007%' AND -- asus_a007
-  user_agent NOT LIKE '%ASUS_Z012DA%' AND -- asus_z012da
-  user_agent NOT LIKE '%ASUS_Z01FD%' AND -- asus_z10fd
-  user_agent NOT LIKE '%ASUS_A002%' AND -- asus_a002
-  user_agent NOT LIKE '%ASUS_P00I%' AND -- asus_p00i
-  -- sharp --
-  user_agent NOT LIKE '%X1%' AND -- sharp_x1
-  user_agent NOT LIKE '%S1%' AND -- sharp_s1
-  user_agent NOT LIKE '%507SH%' AND -- sharp_507sh
-  user_agent NOT LIKE '%S3-SH%' AND -- sharp_s3_sh
-  -- dtab -- 
-  user_agent NOT LIKE '%d-01G%' AND -- dtab_d_01g
-  user_agent NOT LIKE '%d-01J%' AND -- dtab_d_01j
-  user_agent NOT LIKE '%d-01H%' AND -- dtab_d_01h
-  user_agent NOT LIKE '%d-02H%' AND -- dtab_d_02h
-
-  -- vaio --
-  user_agent NOT LIKE '%VPA051%' AND -- vaio_vpa051
-  -- urbano --
-  user_agent NOT LIKE '%KYV31%' AND -- urbano_kyv31
-  user_agent NOT LIKE '%KYV32%' AND -- urbano_kyv32
-  user_agent NOT LIKE '%KYV33%' AND -- urbano_kyv33
-  user_agent NOT LIKE '%KYV34%' AND -- urbano_kyv34
-  user_agent NOT LIKE '%KYV40U%' AND -- urbano_kyv40u
-  user_agent NOT LIKE '%KYV42%' AND -- urbano_kyv42
-  user_agent NOT LIKE '%KYY22%' AND -- urbano_kyy22
-  user_agent NOT LIKE '%KYY23%' AND -- urbano_kyy23
-  user_agent NOT LIKE '%KYY24%' AND -- urbano_kyy24
-  -- kyosera -- 
-  user_agent NOT LIKE '%KYV35%' AND -- kyosera_kyv35
-  user_agent NOT LIKE '%KYV36%' AND -- kyosera_kyv36
-  user_agent NOT LIKE '%KYV37%' AND -- kyosera_kyv37
-  user_agent NOT LIKE '%KC-S301AE%' AND -- kyosera_kc_s301ae
-
-  -- LG --
-  user_agent NOT LIKE '%LG-V480%' AND -- lg_v480
-  user_agent NOT LIKE '%LG-D620%' AND -- lg_d620
-  user_agent NOT LIKE '%LGS01%' AND -- lg_so1
-  user_agent NOT LIKE '%LGS02%' AND -- lg_so2
-  user_agent NOT LIKE '%L-02D%' AND -- lg_02d
-  user_agent NOT LIKE '%L-01F%' AND -- lg_01f
-  user_agent NOT LIKE '%LGL22%' AND -- lg_lgl22
-  user_agent NOT LIKE '%LGL24%' AND -- lg_lgl24
-  user_agent NOT LIKE '%LGT01%' AND -- lg_lgt01
-  user_agent NOT LIKE '%LGT02%' AND -- lg_lgt02
-  user_agent NOT LIKE '%LGT31%' AND -- lg_lgt31
-  user_agent NOT LIKE '%LGT32%' AND -- lg_lgt32
-  user_agent NOT LIKE '%LGV31%' AND -- lg_lgv31
-  user_agent NOT LIKE '%LGV32%' AND -- lg_lgv32
-  user_agent NOT LIKE '%LGV33%' AND -- lg_lgv33
-  user_agent NOT LIKE '%LGV34%' AND -- lg_lgv34
-  user_agent NOT LIKE '%LGV35%' AND -- lg_lgv35
-  -- lenovo --
-  user_agent NOT LIKE '%lenovo%' AND -- lenovo
-  user_agent NOT LIKE '%601LV%' AND -- lenovo_601lv
-  user_agent NOT LIKE '%602LV%' AND -- lenovo_602lv
-  --------
-  user_agent NOT LIKE '%ISW12HT%' AND -- htc_isw12ht
-  user_agent NOT LIKE '%R7005%' AND -- oppo_r3_r7005
-  user_agent NOT LIKE '%PLUS%' AND -- plus
-  user_agent NOT LIKE '%CP-B43%' AND -- covia_cp_b_43
-  user_agent NOT LIKE '%SKT01%' AND -- torque_skt_01
-  user_agent NOT LIKE '%PC-TS708T1W%' AND -- nec_ts_708t1
-  user_agent NOT LIKE '%FTJ161B%' AND -- freetel_rei
-  user_agent NOT LIKE '%WAS-LX2J%' AND -- p_10_lite
-  user_agent NOT LIKE '%Redmi 4X%' AND -- xiaomi_redmi_4x
-  user_agent NOT LIKE '%Moto G%' AND -- moto_g5
-  user_agent NOT LIKE '%LaVieTab PC-TE508S1%' AND -- lavie_pc_te508s1
-  user_agent NOT LIKE '%201M%' -- motorola_201m
-GROUP BY
-  user_agent
-ORDER BY 
-  COUNT(user_agent) DESC;
