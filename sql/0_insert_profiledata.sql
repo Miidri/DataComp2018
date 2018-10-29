@@ -12,4 +12,4 @@ DISTRIBUTED BY(house_num,ind_num,qu_genre_code,question_code,answer_code);
 COPY 
   original.profiledata 
 FROM 
-  '/home/takut0/data/ProfileData_2.csv' WITH CSV; 
+  '/home/takut0/data/ProfileData3.csv' WITH CSV; 

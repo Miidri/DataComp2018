@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS processed.profiledata;
+DROP TABLE IF EXISTS processed.profiledata CASCADE;
 CREATE TABLE processed.profiledata
 (
   house_num INTEGER,
