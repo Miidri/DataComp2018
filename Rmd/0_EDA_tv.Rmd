@@ -74,6 +74,41 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 # Dataset overview
 
-テレビ再生ログ, テレビ接触ログについて自分の解釈用
+## テレビ再生ログ, テレビ接触ログについて自分の解釈用
 
-- テレビ再生ログ(tv_play_p_cv): 実際の行動記録,  
+- テレビ再生ログ(tv_play_p_cv): 
+
+タイムシフトに関してどの時点をいつ方したか分かる1分ごとのデータ(リアルタイム放送は含まれていない)
+実際の1分ごとの行動記録(action_datetime), 視聴した番組が実際に放送されていた1分ごとの時間(timeshift_date)
+
+- テレビ接触ログ(tv_orgn_p_cv):
+
+放送された番組をリアルタイムで観たか, タイムシフトで見たかわかる(data_agg_typ~1:リアルタイム or 9:タイムシフト)
+実際に放送された時間に対応する始点と終点(br_start_datetime, br_end_datetime), 始点と終点が同じデータがあるため何回めの記録か(dataseq)というカラムがある.
+
+**疑問**
+個人の視聴ログなら, 放送開始時刻と放送終了時刻が同一のデータがあってもよい?
+
+## 視聴率について
+
+- [テレビ視聴率測定方法の変革](https://www.advertimes.com/20161107/article237859/)
+- [視聴率の定義](https://www.videor.co.jp/tvrating/pdf/handbook.pdf)
+
+# 視聴率計算
+
+## リアルタイム視聴率
+
+```{r}
+# realtime
+realtime <- orgn2 %>% 
+  filter(data_agg_type == 1) %>% 
+  filter(program_start_time == "1990-07-01 0:00:00")
+  group_by(station_code, program_start_time, program_time) %>% 
+  summarise(watch_rate = sum(watch_time / program_time))
+```
+
+## タイムシフト視聴率
+
+## 総合視聴率
+
+リアルタイム視聴率 + タイムシフト視聴率 - 重複視聴率 = 総合視聴率 
