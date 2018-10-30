@@ -61,7 +61,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 - 標本情報
 
 ```{r}
-dbGetQuery(con2,
+dbGetQuery(con,
 "SELECT
   COUNT(DISTINCT(house_num))
 FROM
@@ -75,7 +75,7 @@ FROM
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -92,7 +92,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -114,7 +114,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -129,7 +129,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -151,7 +151,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -166,7 +166,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -188,7 +188,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -203,7 +203,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -225,7 +225,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -240,7 +240,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -262,7 +262,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -277,7 +277,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -299,7 +299,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -314,7 +314,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -336,7 +336,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM
@@ -351,7 +351,7 @@ dbGetQuery(
   );")
 
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     DISTINCT(A.house_num)
   FROM

@@ -82,13 +82,13 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 ```{r}
 # 同一時刻, 同一id
 dbGetQuery(
-  con2,"SELECT COUNT(*) FROM (SELECT DISTINCT web_start_datetime, house_num FROM processed.t_weblog) AS test;")
+  con,"SELECT COUNT(*) FROM (SELECT DISTINCT web_start_datetime, house_num FROM processed.t_weblog) AS test;")
 # 閲覧時間1秒以上
 dbGetQuery(
-  con2,"SELECT COUNT(*) FROM processed.t_weblog WHERE web_time <> 0;")
+  con,"SELECT COUNT(*) FROM processed.t_weblog WHERE web_time <> 0;")
 # 閲覧時刻i秒以上かつ同一時刻, 同一id
 dbGetQuery(
-  con2,"SELECT COUNT(*) 
+  con,"SELECT COUNT(*) 
         FROM (
           SELECT DISTINCT web_start_datetime, house_num 
           FROM processed.t_weblog 
@@ -97,7 +97,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,"
+  con,"
 SELECT
   COUNT(*)
 FROM

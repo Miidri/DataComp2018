@@ -89,7 +89,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     *
    FROM 
@@ -148,7 +148,7 @@ t_weblog %>%
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "
   SELECT
     avg(t1.count) AS mean,
@@ -211,7 +211,7 @@ t_weblog %>%
 ```{r}
 # extract data
 tmp1 <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     house_num,
     CAST(web_start_datetime AS DATE),
@@ -250,7 +250,7 @@ rm(tmp1,tmp2)
 # 通常時刻
 options(scipen=2)
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     CAST(web_start_datetime AS DATE),
     EXTRACT(DOW FROM CAST(web_start_datetime AS DATE)) AS weekday,
@@ -276,7 +276,7 @@ dbGetQuery(
 # 業界時間
 options(scipen=2)
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_date,
     EXTRACT(DOW FROM web_date) AS weekday,
@@ -307,7 +307,7 @@ dbGetQuery(
 # 通常時刻
 options(scipen=2)
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     EXTRACT(MONTH FROM web_start_datetime) AS month1,
     (ARRAY['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Des'])
@@ -329,7 +329,7 @@ dbGetQuery(
 # 業界時間
 options(scipen=2)
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     EXTRACT(MONTH FROM web_date) AS month1,
     (ARRAY['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Des'])
@@ -355,7 +355,7 @@ dbGetQuery(
 # 普通時間
 options(scipen=2)
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     EXTRACT(DOW FROM web_start_datetime) AS dow1,
     EXTRACT(HOUR FROM web_start_datetime) AS hour,
@@ -379,7 +379,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "
   SELECT
     avg(web_time) AS mean,
@@ -513,7 +513,7 @@ t_weblog %>%
 ```{r eval=FALSE, echo=FALSE}
 # 調査用
 dbGetQuery(
-  con2,
+  con,
   "SELECT web_title, COUNT(web_title)
    FROM processed.t_weblog
    WHERE web_title NOT LIKE '%Google%'
@@ -537,7 +537,7 @@ dbGetQuery(
 
 ```{r}
 yahoo_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -566,7 +566,7 @@ yahoo_search %>%
 
 ```{r}
 google_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -592,7 +592,7 @@ google_search %>%
 
 ```{r}
 rakuten_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -618,7 +618,7 @@ rakuten_search %>%
 
 ```{r}
 twitter_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -644,7 +644,7 @@ twitter_search %>%
 
 ```{r}
 facebook_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -670,7 +670,7 @@ facebook_search %>%
 
 ```{r}
 goo_search <- dbGetQuery(
-  con2,
+  con,
   "SELECT
     web_title,
     COUNT(web_title)
@@ -701,7 +701,7 @@ goo_search %>%
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
 "SELECT
   COUNT(*)
 FROM
@@ -728,7 +728,7 @@ WHERE
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     COUNT(*)
   FROM
@@ -765,7 +765,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "SELECT
     COUNT(*)
   FROM
@@ -808,7 +808,7 @@ dbGetQuery(
 
 ```{r}
 dbGetQuery(
-  con2,
+  con,
   "
 SELECT
   t1.os,
