@@ -1,0 +1,79 @@
+---
+title: 't_weblog: EDA version1'
+author: "kotsubo takuto"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## packages
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(scales)
+library(DT)
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## functions
+
+```{r}
+# filter func
+pick <- function(condition){
+  function(d) d %>% filter_(condition)
+}
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+# Dataset overview
+
+テレビ再生ログ, テレビ接触ログについて自分の解釈用
+
+- テレビ再生ログ(tv_play_p_cv): 実際の行動記録,  
