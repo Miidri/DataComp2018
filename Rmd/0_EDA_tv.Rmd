@@ -118,13 +118,13 @@ realtime <- orgn2 %>%
 
 ```{r}
 # 家庭内でaくん,bくんが異なるtvで同じ番組を視聴していて, 時間に重複があれば, 番組時間を超える視聴時間になっている可能性がある.
-realtime <- orgn2 %>% 
+tmp <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
   filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
   group_by(house_num, station_code, program_start_time, program_time) %>%
-  summarise(house_watch_time = sum(watch_time)) %>% 
-  ungroup() %>% 
-  filter(house_watch_time > program_time)
+  summarise(house_watch_time = sum(watch_time,na.rm = TRUE)) %>% 
+  filter(house_watch_time > program_time) %>% 
+  ungroup()
 ```
 
 ```{r}
@@ -132,11 +132,21 @@ realtime <- orgn2 %>%
 realtime <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
   filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
-  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 平均値を世帯視聴時間とする
-  summarise(house_watch_time = mean(watch_time)) %>% 
-  ungroup() %>% 
-  group_by(station_code, program_start_time) %>% 
-  summarise(all_watch = sum(house_watch_time) / program_time) %>% 
+  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  ungroup() %>%   
+  group_by(station_code, program_start_time,program_time) %>% 
+  summarise(all_watch = sum(house_watch_time,na.rm = TRUE)/program_time) %>% 
+  ungroup()
+
+realtime <- orgn2 %>% 
+  filter(data_agg_type == 1) %>% # リアルタイム視聴
+  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
+  #group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 平均値を世帯視聴時間とする
+  #summarise(house_watch_time = mean(watch_time,na.rm = TRUE)) %>% 
+  #ungroup() %>%   
+  group_by(station_code, program_start_time, program_time) %>% 
+  summarise(all_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
   ungroup()
 ```
 
