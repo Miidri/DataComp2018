@@ -76,15 +76,19 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 ## テレビ再生ログ, テレビ接触ログについて自分の解釈用
 
-- テレビ再生ログ(tv_play_p_cv): 
+- テレビ再生ログ(tv_play_p_cv, play): 
 
 タイムシフトに関してどの時点をいつ方したか分かる1分ごとのデータ(リアルタイム放送は含まれていない)
 実際の1分ごとの行動記録(action_datetime), 視聴した番組が実際に放送されていた1分ごとの時間(timeshift_date)
 
-- テレビ接触ログ(tv_orgn_p_cv):
+- テレビ接触ログ(tv_orgn_p_cv, orgn):
 
 放送された番組をリアルタイムで観たか, タイムシフトで見たかわかる(data_agg_typ~1:リアルタイム or 9:タイムシフト)
 実際に放送された時間に対応する始点と終点(br_start_datetime, br_end_datetime), 始点と終点が同じデータがあるため何回めの記録か(dataseq)というカラムがある.
+
+- TV接触ログと番組情報の結合テーブル(tv_play_program2, orgn2):
+
+接触ログと番組情報のテーブルを結合
 
 **疑問**
 個人の視聴ログなら, 放送開始時刻と放送終了時刻が同一のデータがあってもよい?
@@ -94,20 +98,50 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 - [テレビ視聴率測定方法の変革](https://www.advertimes.com/20161107/article237859/)
 - [視聴率の定義](https://www.videor.co.jp/tvrating/pdf/handbook.pdf)
 
+
 # 視聴率計算
 
 ## リアルタイム視聴率
 
 ```{r}
-# realtime
+# realtime by kuroki
 realtime <- orgn2 %>% 
-  filter(data_agg_type == 1) %>% 
-  filter(program_start_time == "1990-07-01 0:00:00")
-  group_by(station_code, program_start_time, program_time) %>% 
+  filter(data_agg_type == 1) %>% # リアルタイム視聴
+  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
+  group_by(station_code, program_start_time, program_time, tv_num) %>% 
   summarise(watch_rate = sum(watch_time / program_time))
 ```
 
+- data_agg_type == 1ならば, dataseq == 1は確認済み
+- チャンネル,番組開始時刻,テレビ番号で全てユニークなる??
+- テレビ番号で重複消す?, 平均値とか最大値とかでもよさそう??
+
+```{r}
+# 家庭内でaくん,bくんが異なるtvで同じ番組を視聴していて, 時間に重複があれば, 番組時間を超える視聴時間になっている可能性がある.
+realtime <- orgn2 %>% 
+  filter(data_agg_type == 1) %>% # リアルタイム視聴
+  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
+  group_by(house_num, station_code, program_start_time, program_time) %>%
+  summarise(house_watch_time = sum(watch_time)) %>% 
+  ungroup() %>% 
+  filter(house_watch_time > program_time)
+```
+
+```{r}
+# realtime
+realtime <- orgn2 %>% 
+  filter(data_agg_type == 1) %>% # リアルタイム視聴
+  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
+  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 平均値を世帯視聴時間とする
+  summarise(house_watch_time = mean(watch_time)) %>% 
+  ungroup() %>% 
+  group_by(station_code, program_start_time) %>% 
+  summarise(all_watch = sum(house_watch_time) / program_time) %>% 
+  ungroup()
+```
+
 ## タイムシフト視聴率
+
 
 ## 総合視聴率
 
