@@ -12,14 +12,17 @@ GROUP BY
   
 -- TV接触ログと番組情報の結合テーブル -- 
 SELECT
-  MIN(watch_time),
-  MAX(watch_time),
-  MIN(program_time),
-  MAX(program_time)
+  house_num,
+  COUNT(house_num)
 FROM
-  edit.tv_orgn_program_2;
-  
-  
+  edit.tv_orgn_program_2
+WHERE
+  data_agg_type = 1
+GROUP BY
+  program_start_time, house_num
+ORDER BY 
+  COUNT(house_num) DESC;
+
 SELECT 
   COUNT(*)
 FROM 
