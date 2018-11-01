@@ -9,11 +9,13 @@ MeanWatchRate <- function(tmp){
            pre4 = program_start_time - weeks(4))
   # parallel process1
   cl <- makeCluster(detectCores())
+  counter <- 1
   registerDoParallel(cl)
   on.exit(stopCluster(cl)) 
   ans <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
-    for(j in 1:nrow(tmp)){
+    for(j in counter:nrow(tmp)){
       if(tmp_$pre1[i] >= tmp$program_start_time[j] && tmp_$pre1[i] < tmp$program_start_time[j+1]){
+        counter <- j
         return(tmp$all_watch_rate[j])
         break
       }

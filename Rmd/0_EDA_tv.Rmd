@@ -55,6 +55,7 @@ library(foreach)
 library(DT)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+# theme_set(theme_classic(base_size = 18,base_family = HiraKakuPro-W3"))
 ```
 d
 ## functions
@@ -301,6 +302,15 @@ alltime %>%
   ggplot(aes(x=all_watch_rate)) +
     stat_bin(bins = 30) +
     facet_wrap(~ station_code, ncol=4)
+```
+
+## Violin plot
+
+```{r}
+ggplot(alltime,aes(factor(station_code), all_watch_rate)) +
+  geom_violin() + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(x = "視聴率") 
 ```
 
 
