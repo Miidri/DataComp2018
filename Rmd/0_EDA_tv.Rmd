@@ -55,9 +55,8 @@ library(foreach)
 library(DT)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
-# theme_set(theme_classic(base_size = 18,base_family = HiraKakuPro-W3"))
 ```
-d
+
 ## functions
 
 ```{r}
@@ -304,15 +303,6 @@ alltime %>%
     facet_wrap(~ station_code, ncol=4)
 ```
 
-## Violin plot
-
-```{r}
-ggplot(alltime,aes(factor(station_code), all_watch_rate)) +
-  geom_violin() + 
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(x = "視聴率") 
-```
-
 
 ## カラムの関係性
 
@@ -416,44 +406,33 @@ alltime %>%
 
 ```{r}
 # 必要な情報を抽出
-tmp1 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 1)
-tmp2 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 2)
-tmp3 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 3)
-tmp4 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 4)
-tmp5 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 5)
-tmp6 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 6)
-tmp7 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 7)
+tmp1 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 1) %>% MeanWatchRate()
+tmp2 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 2) %>% MeanWatchRate()
+tmp3 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 3) %>% MeanWatchRate()
+tmp4 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 4) %>% MeanWatchRate()
+tmp5 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>%
+  filter(station_code == 5) %>% MeanWatchRate()
+tmp6 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 6) %>% MeanWatchRate()
+tmp7 <- alltime %>%
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 7) %>% MeanWatchRate()
 ```
 
-```{r}
-MeanWatchRate(tmp = tmp1) -> ans
-```
+- 全てのデータを結合し, 元に戻す.
 
 ```{r}
-# まずfor文
-t = 1
-for(i in 1:100){
-  for(j in t:10000){
-    if(tmp1_$pre1[i] >= tmp1$program_start_time[j] && tmp1_$pre1[i] < tmp1$program_start_time[j+1]){
-      tmp1_$rate1[i] = tmp1$all_watch_rate[j]
-      t = j
-      break
-    }
-  }
-}
-
-cl <- makeCluster(detectCores())
-registerDoParallel(cl)
-on.exit(stopCluster(cl)) 
-k <- foreach (i = 1:10, .combine = c) %do% {
-    for(j in 1:10000){
-      if(tmp1_$pre1[i] >= tmp1$program_start_time[j] && tmp1_$pre1[i] < tmp1$program_start_time[j+1]){
-        return(tmp1$all_watch_rate[j])
-        break
-       }
-    }
-}
-
-stopCluster(cluster)
+alltime2 <- bind_rows(tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7) %>% 
+  mutate(mean_rate = rowMeans(select(., rate1,rate2,rate3,rate4), na.rm = TRUE))
 ```
 
