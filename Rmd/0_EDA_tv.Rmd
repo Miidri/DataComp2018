@@ -100,6 +100,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 - [テレビ視聴率測定方法の変革](https://www.advertimes.com/20161107/article237859/)
 - [視聴率の定義](https://www.videor.co.jp/tvrating/pdf/handbook.pdf)
+- [CM価格の決定要因](https://xica.net/magellan/marketing-idea/column/multiple-prices-of-tvcm/)
 
 # 視聴率計算
 
@@ -228,11 +229,45 @@ head(difftime)
 
 ## 視聴率
 
-- 全てのテーブルを結合し, リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出する
+- 全てのテーブルを番組情報に結合し, リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出する
 
 ```{r}
- <- realtime %>% 
+alltime <- program %>% 
+  select(station_code, program_start_time, program_time) %>% 
+  dplyr::collect() %>% 
+  left_join(realtime, by= c("station_code", "program_start_time","program_time")) %>% 
+  left_join(timeshift, by= c("station_code", "program_start_time","program_time")) %>% 
+  left_join(difftime, by= c("station_code", "program_start_time","program_time")) %>% 
+  mutate(
+    all_watch = case_when(
+      !is.na(real_watch) & is.na(diff_watch) ~ real_watch,
+      is.na(real_watch) & !is.na(diff_watch) ~ diff_watch,
+      is.na(real_watch) & is.na(diff_watch) ~ NA_real_,
+      TRUE ~ real_watch + diff_watch
+      )
+  ) %>% 
+  mutate(program_date_normal = .$program_start_time %>% as.Date(tz = "Asia/Tokyo")) %>% # 標本情報は普通時刻なので, 普通時刻のカラムを作成
+  arrange(program_date_normal,station_code,program_start_time) %>%  
   left_join(sample_count, by=c("program_date_normal"="sample_date")) %>% 
-  dplyr::mutate(watch_rate = all_watch / sample_num)
+  mutate(real_watch_rate = real_watch / sample_num,
+         shift_watch_rate = shift_watch / sample_num,
+         all_watch_rate = all_watch / sample_num) %>% 
+  select(-program_date_normal)
+```
+
+```{r}
+head(alltime)
+```
+
+## 保存
+
+```{r}
+write_csv(alltime,"~/Desktop/DataComp2018/data/watch_rate.csv")
+```
+
+# 分析
+
+```{r}
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
 ```
 
