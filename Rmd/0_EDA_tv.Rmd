@@ -303,6 +303,28 @@ alltime %>%
     facet_wrap(~ station_code, ncol=4)
 ```
 
+## Violin Plot
+
+```{r}
+ggplot(alltime,aes(factor(station_code), real_watch_rate)) +
+  geom_violin() + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y = "リアルタイム視聴率", x="チャンネル") 
+```
+
+```{r}
+ggplot(alltime,aes(factor(station_code), shift_watch_rate)) +
+  geom_violin() + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y = "タイムシフト視聴率", x="チャンネル") 
+```
+
+```{r}
+ggplot(alltime,aes(factor(station_code), all_watch_rate)) +
+  geom_violin() + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y = "総合視聴率", x="チャンネル") 
+```
 
 ## カラムの関係性
 
@@ -327,7 +349,6 @@ alltime %>%
   ggplot(aes(real_watch_rate, shift_watch_rate)) +
     geom_point() +
     facet_wrap(~station_code)
-    
 ```
 
 - リアルタイム / 総合
@@ -396,9 +417,11 @@ alltime %>%
           axis.title.x = element_blank())
 ```
 
-# 視聴率分析
+# 従来手法の妥当性について
 
-## 従来手法の妥当性について
+- 過去四週間の視聴率の平均値を, 予測値として扱うことの妥当性を検証する.
+
+## データ形成
 
 - 5月以降のデータについて, 過去4週間のデータの平均値を基に推定し, 実測値と比較.
 - 効率化のため, チャンネル毎にテーブルを分割して処理をする.
@@ -434,5 +457,21 @@ tmp7 <- alltime %>%
 ```{r}
 alltime2 <- bind_rows(tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7) %>% 
   mutate(mean_rate = rowMeans(select(., rate1,rate2,rate3,rate4), na.rm = TRUE))
+```
+
+## 可視化
+
+- かなり的中率良い
+
+```{r}
+alltime2 %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  stat_poly_eq(aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),
+               formula = formula, parse = TRUE) +
+
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="予測視聴率", x="実測値") 
 ```
 
