@@ -8,7 +8,7 @@ MeanWatchRate <- function(tmp){
            pre3 = program_start_time - weeks(3),
            pre4 = program_start_time - weeks(4))
   # parallel process1
-  cl <- makeCluster(2); counter <- 1;
+  cl <- makeCluster(4); counter <- 1;
   registerDoParallel(cl); 
   ans1 <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
     for(j in counter:nrow(tmp)){
@@ -26,7 +26,7 @@ MeanWatchRate <- function(tmp){
   #  }
   #}
   # parallel process2
-  cl <- makeCluster(2); counter <- 1;
+  cl <- makeCluster(4); counter <- 1;
   registerDoParallel(cl); 
   ans2 <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
     for(j in counter:nrow(tmp)){
@@ -37,7 +37,7 @@ MeanWatchRate <- function(tmp){
   }
   stopCluster(cl)
   # parallel process3
-  cl <- makeCluster(2); counter <- 1;
+  cl <- makeCluster(4); counter <- 1;
   registerDoParallel(cl); 
   ans3 <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
     for(j in counter:nrow(tmp)){
@@ -48,7 +48,7 @@ MeanWatchRate <- function(tmp){
   }
   stopCluster(cl)
   # parallel process4
-  cl <- makeCluster(2); counter <- 1;
+  cl <- makeCluster(4); counter <- 1;
   registerDoParallel(cl); 
   ans4 <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
     for(j in counter:nrow(tmp)){
