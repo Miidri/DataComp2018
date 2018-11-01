@@ -6,7 +6,7 @@ output:
       md_extensions: -ascii_identifiers
       toc: true
       toc_depth: 3
-      code_folding: hide
+      # code_folding: hide
 ---
 
 # Setting{.tabset .tabset-fade .tabset-pills}
@@ -34,6 +34,7 @@ opts_chunk$set(echo=TRUE,
                comment=NA,
                message=FALSE,
                warning=FALSE,
+               eval = FALSE,
                fig.width = 11)
 opts_knit$set(width=75)
 ```
@@ -74,7 +75,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 # Dataset overview
 
-## テレビ再生ログ, テレビ接触ログについて自分の解釈用
+## テレビ再生ログ, テレビ接触ログについて
 
 - テレビ再生ログ(tv_play_p_cv, play): 
 
@@ -88,6 +89,8 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 - TV接触ログと番組情報の結合テーブル(tv_play_program2, orgn2):
 
+テレビ接触ログと番組情報のテーブルを結合し, リアルタイム, タイムシフトそれぞれにおける視聴時間を記録
+
 接触ログと番組情報のテーブルを結合
 
 **疑問**
@@ -98,25 +101,36 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 - [テレビ視聴率測定方法の変革](https://www.advertimes.com/20161107/article237859/)
 - [視聴率の定義](https://www.videor.co.jp/tvrating/pdf/handbook.pdf)
 
-
 # 視聴率計算
 
-## リアルタイム視聴率
+1. リアルタイム, タイムシフト, 総合視聴を別々に導出
+2. 番組情報のテーブルに結合して, 日付を普通時刻に変更, 日付, チャンネル, 番組開始時刻でsortする
+3. 標本世帯数の情報を結合し, 各視聴率を求める
+
+- 同一家庭で複数のtv_numにおいて視聴している場合, 最大値を世帯視聴時間とする
+- (リアルタイム視聴率) + (リアルタイム視聴率を除いたタイムシフト視聴率) = 総合視聴率
+
+## 期間内の各日程における標本世帯数
+
+- sample_date: 一般的な時刻
+- sample_num: 標本世帯数
 
 ```{r}
-# realtime by kuroki
-realtime <- orgn2 %>% 
-  filter(data_agg_type == 1) %>% # リアルタイム視聴
-  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
-  group_by(station_code, program_start_time, program_time, tv_num) %>% 
-  summarise(watch_rate = sum(watch_time / program_time))
+sample_count <- sample %>% 
+  group_by(sample_date) %>% 
+  summarise(sample_num = count(house_num)) %>% 
+  dplyr::collect()
 ```
 
-- data_agg_type == 1ならば, dataseq == 1は確認済み
-- チャンネル,番組開始時刻,テレビ番号で全てユニークなる??
-- テレビ番号で重複消す?, 平均値とか最大値とかでもよさそう??
-
 ```{r}
+head(sample_count)
+```
+
+## リアルタイム視聴
+
+- data_agg_type == 1ならば, dataseq == 1は確認済み
+
+```{r eval=FALSE}
 # 家庭内でaくん,bくんが異なるtvで同じ番組を視聴していて, 時間に重複があれば, 番組時間を超える視聴時間になっている可能性がある.
 tmp <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
@@ -128,31 +142,97 @@ tmp <- orgn2 %>%
 ```
 
 ```{r}
-# realtime
+# realtime, 複数のtv_numにおいて最大値を世帯視聴時間とする
 realtime <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
   filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
   group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
   summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
   ungroup() %>%   
-  group_by(station_code, program_start_time,program_time) %>% 
-  summarise(all_watch = sum(house_watch_time,na.rm = TRUE)/program_time) %>% 
-  ungroup()
-
-realtime <- orgn2 %>% 
-  filter(data_agg_type == 1) %>% # リアルタイム視聴
-  filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
-  #group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 平均値を世帯視聴時間とする
-  #summarise(house_watch_time = mean(watch_time,na.rm = TRUE)) %>% 
-  #ungroup() %>%   
   group_by(station_code, program_start_time, program_time) %>% 
-  summarise(all_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
-  ungroup()
+  summarise(real_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  ungroup() %>% 
+  dplyr::collect()
 ```
 
-## タイムシフト視聴率
+```{r}
+head(realtime)
+```
 
+## タイムシフト視聴
 
-## 総合視聴率
+```{r}
+timeshift <- play %>% 
+  distinct(house_num, station_code, timeshift_datetime, timeshift_date, tv_num) %>% # タイムシフト再生で同じ部分を見ている記録を削除
+  left_join(program %>% 
+              select(station_code, program_date, program_start_time, program_end_time, program_time),
+            by = c("station_code", "timeshift_date" = "program_date")) %>% # チャンネルと日付で番組情報を結合
+  rename(program_date = timeshift_date) %>% 
+  filter(program_start_time < timeshift_datetime &&  timeshift_datetime < program_end_time) %>% # 番組の開始時刻と終了時刻を用いて, 番組を特定する
+  group_by(house_num, tv_num, station_code, program_start_time, program_time) %>% 
+  summarise(watch_time = count(timeshift_datetime)) %>% 
+  ungroup() %>% 
+  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  ungroup() %>%   
+  group_by(station_code, program_start_time, program_time) %>% 
+  summarise(shift_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  ungroup() %>% 
+  dplyr::collect()  
+```
 
-リアルタイム視聴率 + タイムシフト視聴率 - 重複視聴率 = 総合視聴率 
+```{r}
+head(timeshift)
+```
+
+## リアルタイム視聴を除いたタイムシフト視聴
+
+- リアルタイムを除いた, タイムシフトの視聴時間
+
+```{r}
+# リアルタイム視聴データ
+realtime_tmp <- orgn %>% 
+  filter(data_agg_type == 1) %>% 
+  select(house_num, station_code, br_date, br_start_datetime, br_end_datetime)
+# リアルタイム視聴データを
+difftime <- play %>% 
+  distinct(house_num, timeshift_datetime, station_code, timeshift_date, tv_num) %>% # タイムシフト再生で同じ部分を見ている記録を削除
+  left_join(realtime_tmp, by = c("house_num", "station_code", "timeshift_date" = "br_date" )) %>% # br_date, timeshift_dateは業界日付情報
+  mutate(flag1 = br_start_datetime <= timeshift_datetime,
+         flag2 = br_end_datetime >= timeshift_datetime) %>% # タイムシフト再生がリアルタイム再生の開始時刻と終了時刻に含まれているか
+  mutate(flag3 = case_when(flag1 & flag2 ~ TRUE, TRUE ~ FALSE)) %>% # 両方がTRUE -> TRUE (除去), どちらかがFALSEもしくはNA -> FALSE(有効)
+  group_by(house_num, station_code, timeshift_datetime, tv_num) %>% 
+  filter(sum(as.integer(flag3),na.rm = TRUE) == 0) %>% # 1つのtimeshift_datetimeに複数のリアルタイム再生の記録がleft_joinされており, 全てFALSEなら有効なタイムシフト再生となる
+  ungroup() %>% 
+  distinct(house_num, station_code, timeshift_datetime, timeshift_date, tv_num) %>% # 複数のリアルタイム放送をleft_joinしたため重複が再度発生している.
+  left_join(program %>% 
+              select(station_code, program_date, program_start_time, program_end_time, program_time),
+            by = c("station_code", "timeshift_date" = "program_date")) %>% # チャンネルと日付で番組情報を結合
+  rename(program_date = timeshift_date) %>% 
+  filter(program_start_time < timeshift_datetime &&  timeshift_datetime < program_end_time) %>% # 番組の開始時刻と終了時刻を用いて, 番組を特定する
+  group_by(house_num, tv_num, station_code, program_start_time, program_time) %>% 
+  summarise(watch_time = count(timeshift_datetime)) %>% 
+  ungroup() %>% 
+  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  ungroup() %>%   
+  group_by(station_code, program_start_time, program_time) %>% 
+  summarise(diff_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  ungroup() %>% 
+  dplyr::collect()  
+```
+
+```{r}
+head(difftime)
+```
+
+## 視聴率
+
+- 全てのテーブルを結合し, リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出する
+
+```{r}
+ <- realtime %>% 
+  left_join(sample_count, by=c("program_date_normal"="sample_date")) %>% 
+  dplyr::mutate(watch_rate = all_watch / sample_num)
+```
+
