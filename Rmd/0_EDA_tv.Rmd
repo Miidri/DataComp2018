@@ -459,18 +459,23 @@ alltime2 <- bind_rows(tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7) %>%
   mutate(mean_rate = rowMeans(select(., rate1,rate2,rate3,rate4), na.rm = TRUE))
 ```
 
+```{r}
+alltime2 %>% head()
+```
+
 ## 可視化
 
 - かなり的中率良い
+- 逆に言えば簡単なモデルでも予測できるんじゃないか??
 
 ```{r}
+formula <- y ~ x
 alltime2 %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   geom_point() + 
-  geom_smooth(method = "lm") +
+  geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),
-               formula = formula, parse = TRUE) +
-
+               formula = formula, parse = TRUE) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="予測視聴率", x="実測値") 
 ```
