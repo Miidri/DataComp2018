@@ -34,7 +34,6 @@ opts_chunk$set(echo=TRUE,
                comment=NA,
                message=FALSE,
                warning=FALSE,
-               eval = FALSE,
                fig.width = 11)
 opts_knit$set(width=75)
 ```
@@ -71,6 +70,12 @@ pick <- function(condition){
 
 ```{r}
 source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+## load data
+
+```{r}
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
 ```
 
 # Dataset overview
@@ -116,14 +121,14 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 - sample_date: 一般的な時刻
 - sample_num: 標本世帯数
 
-```{r}
+```{r eval=FALSE}
 sample_count <- sample %>% 
   group_by(sample_date) %>% 
   summarise(sample_num = count(house_num)) %>% 
   dplyr::collect()
 ```
 
-```{r}
+```{r eval=FALSE}
 head(sample_count)
 ```
 
@@ -142,7 +147,7 @@ tmp <- orgn2 %>%
   ungroup()
 ```
 
-```{r}
+```{r eval=FALSE}
 # realtime, 複数のtv_numにおいて最大値を世帯視聴時間とする
 realtime <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
@@ -156,13 +161,13 @@ realtime <- orgn2 %>%
   dplyr::collect()
 ```
 
-```{r}
+```{r eval=FALSE}
 head(realtime)
 ```
 
 ## タイムシフト視聴
 
-```{r}
+```{r eval=FALSE}
 timeshift <- play %>% 
   distinct(house_num, station_code, timeshift_datetime, timeshift_date, tv_num) %>% # タイムシフト再生で同じ部分を見ている記録を削除
   left_join(program %>% 
@@ -182,7 +187,7 @@ timeshift <- play %>%
   dplyr::collect()  
 ```
 
-```{r}
+```{r eval=FALSE}
 head(timeshift)
 ```
 
@@ -190,7 +195,7 @@ head(timeshift)
 
 - リアルタイムを除いた, タイムシフトの視聴時間
 
-```{r}
+```{r eval=FALSE}
 # リアルタイム視聴データ
 realtime_tmp <- orgn %>% 
   filter(data_agg_type == 1) %>% 
@@ -210,7 +215,7 @@ difftime <- play %>%
               select(station_code, program_date, program_start_time, program_end_time, program_time),
             by = c("station_code", "timeshift_date" = "program_date")) %>% # チャンネルと日付で番組情報を結合
   rename(program_date = timeshift_date) %>% 
-  filter(program_start_time < timeshift_datetime &&  timeshift_datetime < program_end_time) %>% # 番組の開始時刻と終了時刻を用いて, 番組を特定する
+  filter(program_start_time < timeshift_datetime && timeshift_datetime < program_end_time) %>% # 番組の開始時刻と終了時刻を用いて, 番組を特定する
   group_by(house_num, tv_num, station_code, program_start_time, program_time) %>% 
   summarise(watch_time = count(timeshift_datetime)) %>% 
   ungroup() %>% 
@@ -223,7 +228,7 @@ difftime <- play %>%
   dplyr::collect()  
 ```
 
-```{r}
+```{r eval=FALSE}
 head(difftime)
 ```
 
@@ -231,7 +236,7 @@ head(difftime)
 
 - 全てのテーブルを番組情報に結合し, リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出する
 
-```{r}
+```{r eval=FALSE}
 alltime <- program %>% 
   select(station_code, program_start_time, program_time) %>% 
   dplyr::collect() %>% 
@@ -255,19 +260,140 @@ alltime <- program %>%
   select(-program_date_normal)
 ```
 
-```{r}
+```{r eval=FALSE}
 head(alltime)
 ```
 
 ## 保存
 
-```{r}
+```{r eval=FALSE}
 write_csv(alltime,"~/Desktop/DataComp2018/data/watch_rate.csv")
 ```
 
-# 分析
+# 視聴率分析
+
+## 概観
 
 ```{r}
-alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+head(alltime)
+```
+
+## ヒストグラム
+
+- 各視聴率のヒストグラム
+
+```{r}
+p1 <- alltime %>% 
+  ggplot(aes(x=real_watch_rate)) +
+    stat_bin(bins = 30)
+p2 <- alltime %>% 
+  ggplot(aes(x=shift_watch_rate)) +
+    stat_bin(bins = 30)
+p3 <- alltime %>% 
+  ggplot(aes(x=all_watch_rate)) +
+    stat_bin(bins = 30)
+gridExtra::grid.arrange(p1,p2,p3,ncol=3)
+```
+
+- チャンネルごとの視聴率
+
+```{r}
+alltime %>% 
+  ggplot(aes(x=all_watch_rate)) +
+    stat_bin(bins = 30) +
+    facet_wrap(~ station_code, ncol=4)
+```
+
+
+## カラムの関係性
+
+- リアルタイム / タイムシフト
+
+2パターンの傾向が見える.
+
+```{r}
+alltime %>% 
+  select(real_watch_rate, shift_watch_rate) %>% 
+  na.omit() %>%
+  ggplot(aes(real_watch_rate, shift_watch_rate)) +
+    geom_point()
+```
+
+- リアルタイム / タイムシフト (チャンネル毎)
+
+```{r}
+alltime %>% 
+  select(station_code,real_watch_rate, shift_watch_rate) %>% 
+  na.omit() %>%
+  ggplot(aes(real_watch_rate, shift_watch_rate)) +
+    geom_point() +
+    facet_wrap(~station_code)
+    
+```
+
+- リアルタイム / 総合
+
+```{r}
+alltime %>% 
+  select(real_watch_rate, all_watch_rate) %>% 
+  na.omit() %>%
+  ggplot(aes(real_watch_rate, all_watch_rate)) +
+    geom_point()
+```
+
+- タイムシフト / 総合
+
+```{r}
+alltime %>% 
+  select(shift_watch_rate, all_watch_rate) %>% 
+  na.omit() %>%
+  ggplot(aes(shift_watch_rate, all_watch_rate)) +
+    geom_point()
+```
+
+- リアルタイム / プログラム時間
+
+```{r}
+alltime %>% 
+  select(real_watch_rate, program_time) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=program_time, y=real_watch_rate)) +
+  geom_point()
+```
+
+- タイムシフト / プログラム時間
+
+```{r}
+alltime %>% 
+  select(shift_watch_rate, program_time) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=program_time, y=shift_watch_rate)) +
+  geom_point()
+```
+
+- 総合 / プログラム時間
+
+```{r}
+alltime %>% 
+  select(all_watch_rate, program_time) %>% 
+  na.omit() %>% 
+  ggplot(aes(x=program_time, y=all_watch_rate)) +
+  geom_point()
+```
+
+## 時系列plot
+
+- チャンネル毎に視聴率の推移を時系列plot
+
+パターンある. 平均で予測できてしまっているのではないか??
+
+```{r}
+alltime %>% 
+  filter(month(program_start_time) == "9") %>% 
+  ggplot(aes(x=program_start_time, real_watch_rate,color = station_code)) +
+    geom_line() +
+    scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1),
+          axis.title.x = element_blank())
 ```
 
