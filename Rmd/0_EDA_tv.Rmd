@@ -52,12 +52,11 @@ library(ggpmisc)
 library(scales)
 library(doParallel)
 library(foreach)
-library(pforeach)
 library(DT)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
-
+d
 ## functions
 
 ```{r}
@@ -415,7 +414,6 @@ tmp5 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>%
 tmp6 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 6)
 tmp7 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 7)
 ```
-
 
 ```{r}
 MeanWatchRate(tmp = tmp1) -> ans
