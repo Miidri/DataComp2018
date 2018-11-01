@@ -50,6 +50,9 @@ library(lubridate)
 library(ggthemes)
 library(ggpmisc)
 library(scales)
+library(doParallel)
+library(foreach)
+library(pforeach)
 library(DT)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
@@ -58,10 +61,7 @@ theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ## functions
 
 ```{r}
-# filter func
-pick <- function(condition){
-  function(d) d %>% filter_(condition)
-}
+source('~/Desktop/DataComp2018/script/mean_watch_rate.R')
 ```
 
 ## Database connecting 
@@ -270,7 +270,7 @@ head(alltime)
 write_csv(alltime,"~/Desktop/DataComp2018/data/watch_rate.csv")
 ```
 
-# 視聴率分析
+# 基礎集計
 
 ## 概観
 
@@ -395,5 +395,57 @@ alltime %>%
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
     theme(axis.text.x = element_text(angle = 30, hjust = 1),
           axis.title.x = element_blank())
+```
+
+# 視聴率分析
+
+## 従来手法の妥当性について
+
+- 5月以降のデータについて, 過去4週間のデータの平均値を基に推定し, 実測値と比較.
+- 効率化のため, チャンネル毎にテーブルを分割して処理をする.
+- 1週間ずつ戻して,開始時刻が一致する場合はその視聴率を使用し, 一致しない場合は対象のtvの開始時刻が含まれる1週間前のtvで代用する.
+
+```{r}
+# 必要な情報を抽出
+tmp1 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 1)
+tmp2 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 2)
+tmp3 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 3)
+tmp4 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 4)
+tmp5 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 5)
+tmp6 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 6)
+tmp7 <- alltime %>% select(station_code, program_start_time, all_watch_rate) %>% filter(station_code == 7)
+```
+
+
+```{r}
+MeanWatchRate(tmp = tmp1) -> ans
+```
+
+```{r}
+# まずfor文
+t = 1
+for(i in 1:100){
+  for(j in t:10000){
+    if(tmp1_$pre1[i] >= tmp1$program_start_time[j] && tmp1_$pre1[i] < tmp1$program_start_time[j+1]){
+      tmp1_$rate1[i] = tmp1$all_watch_rate[j]
+      t = j
+      break
+    }
+  }
+}
+
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+on.exit(stopCluster(cl)) 
+k <- foreach (i = 1:10, .combine = c) %do% {
+    for(j in 1:10000){
+      if(tmp1_$pre1[i] >= tmp1$program_start_time[j] && tmp1_$pre1[i] < tmp1$program_start_time[j+1]){
+        return(tmp1$all_watch_rate[j])
+        break
+       }
+    }
+}
+
+stopCluster(cluster)
 ```
 
