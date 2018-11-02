@@ -49,6 +49,7 @@ library(dbplyr)
 library(lubridate)
 library(ggthemes)
 library(ggpmisc)
+library(ggforce)
 library(scales)
 library(doParallel)
 library(foreach)
@@ -75,6 +76,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 ```{r}
 alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 ```
 
 # Dataset overview
@@ -409,12 +411,17 @@ alltime %>%
 
 ```{r}
 alltime %>% 
-  filter(month(program_start_time) == "9") %>% 
-  ggplot(aes(x=program_start_time, real_watch_rate,color = station_code)) +
-    geom_line() +
+  # filter(month(program_start_time) == "9") %>% 
+  ggplot(aes(x=program_start_time, real_watch_rate)) +
+    geom_line(aes(color = factor(station_code))) +
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
+    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    guides(colour = guide_legend(title = "チャンネル")) +
+    labs(y = "総合視聴率") +
     theme(axis.text.x = element_text(angle = 30, hjust = 1),
-          axis.title.x = element_blank())
+          axis.title.x = element_blank()) +
+    facet_zoom(xy = month(program_start_time) == "11", horizontal = FALSE)
+  
 ```
 
 # 従来手法の妥当性について
@@ -423,11 +430,13 @@ alltime %>%
 
 ## データ形成
 
+* 処理に時間がかかるため, csvに書き出す.
+
 - 5月以降のデータについて, 過去4週間のデータの平均値を基に推定し, 実測値と比較.
 - 効率化のため, チャンネル毎にテーブルを分割して処理をする.
 - 1週間ずつ戻して,開始時刻が一致する場合はその視聴率を使用し, 一致しない場合は対象のtvの開始時刻が含まれる1週間前のtvで代用する.
 
-```{r}
+```{r, eval=FALSE}
 # 必要な情報を抽出
 tmp1 <- alltime %>% 
   select(station_code, program_start_time, all_watch_rate) %>% 
@@ -454,16 +463,24 @@ tmp7 <- alltime %>%
 
 - 全てのデータを結合し, 元に戻す.
 
-```{r}
+```{r, eval=FALSE}
 alltime2 <- bind_rows(tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7) %>% 
   mutate(mean_rate = rowMeans(select(., rate1,rate2,rate3,rate4), na.rm = TRUE))
 ```
 
-```{r}
-alltime2 %>% head()
+- save
+
+```{r, eval=FALSE}
+write_csv(alltime2,"~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 ```
 
 ## 可視化
+
+- check
+
+```{r}
+alltime2 %>% head()
+```
 
 - かなり的中率良い
 - 逆に言えば簡単なモデルでも予測できるんじゃないか??
@@ -477,6 +494,15 @@ alltime2 %>%
   stat_poly_eq(aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),
                formula = formula, parse = TRUE) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="予測視聴率", x="実測値") 
+```
+
+```{r}
+alltime2 %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point(aes(colour = factor(station_code))) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = guide_legend(title = "チャンネル")) +
   labs(y ="予測視聴率", x="実測値") 
 ```
 
