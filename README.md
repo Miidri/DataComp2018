@@ -20,6 +20,12 @@ For the working process
 
 - sql_connect.R : SQL接続情報, no push
 
+## data
+
+- watch_rate.csv: リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出　
+- watch_rate_pre.csv: 過去4週間の視聴率の平均値を該当する番組の推定視聴率とする
+- 接触ログと再生ログのイメージ.xlsx: 接触ログ, 再生ログの概略図
+
 ## Directory
 
 ```
@@ -27,9 +33,20 @@ For the working process
 ├── README.md
 ├── Rmd
 │   ├── 0_EDA_check_house_number.Rmd
+│   ├── 0_EDA_check_house_number.html
 │   ├── 0_EDA_t_weblog.Rmd
-│   └── 1_Analysis_t_weblog.Rmd
+│   ├── 0_EDA_t_weblog.html
+│   ├── 0_EDA_t_weblog_about_unique.Rmd
+│   ├── 0_EDA_t_weblog_about_unique.html
+│   ├── 0_EDA_tv.Rmd
+│   ├── 0_EDA_tv.html
+│   └── 1_Analysis_slide.Rmd
+├── data
+│   ├── watch_rate.csv
+│   ├── watch_rate_pre.csv
+│   └── 接触ログと再生ログのイメージ.xlsx
 ├── script
+│   ├── mean_watch_rate.R
 │   └── sql_connect.R
 └── sql
     ├── 0_insert_profiledata.sql
