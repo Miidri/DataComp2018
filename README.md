@@ -17,9 +17,9 @@ For the working process
 - 0 : EDA for each
 
 ## script
-
+ 
 - sql_connect.R : SQL接続情報, no push
-
+- function.R: 各種関数
 ## data
 
 - watch_rate.csv: リアルタイム視聴率, タイムシフト視聴率, 総合視聴率を算出　
@@ -46,7 +46,7 @@ For the working process
 │   ├── watch_rate_pre.csv
 │   └── 接触ログと再生ログのイメージ.xlsx
 ├── script
-│   ├── mean_watch_rate.R
+│   ├── function.R
 │   └── sql_connect.R
 └── sql
     ├── 0_insert_profiledata.sql
