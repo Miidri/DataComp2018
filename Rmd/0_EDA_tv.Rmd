@@ -114,7 +114,7 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 2. 番組情報のテーブルに結合して, 日付を普通時刻に変更, 日付, チャンネル, 番組開始時刻でsortする
 3. 標本世帯数の情報を結合し, 各視聴率を求める
 
-- 同一家庭で複数のtv_numにおいて視聴している場合, 最大値を世帯視聴時間とする
+- 同一家庭で複数のtv_numにおいて視聴している場合, 最大値を世帯視聴時間とする -> 各家庭代表者一人しかいないので不要
 - (リアルタイム視聴率) + (リアルタイム視聴率を除いたタイムシフト視聴率) = 総合視聴率
 
 ## 期間内の各日程における標本世帯数
@@ -153,11 +153,11 @@ tmp <- orgn2 %>%
 realtime <- orgn2 %>% 
   filter(data_agg_type == 1) %>% # リアルタイム視聴
   filter(program_start_time != "1990-07-01 0:00:00") %>% # 何も放送していない時間の情報
-  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
-  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
-  ungroup() %>%   
+  #group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  #summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  #ungroup() %>%   
   group_by(station_code, program_start_time, program_time) %>% 
-  summarise(real_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  summarise(real_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
   ungroup() %>% 
   dplyr::collect()
 ```
@@ -179,11 +179,11 @@ timeshift <- play %>%
   group_by(house_num, tv_num, station_code, program_start_time, program_time) %>% 
   summarise(watch_time = count(timeshift_datetime)) %>% 
   ungroup() %>% 
-  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
-  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
-  ungroup() %>%   
+  #group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  #summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  #ungroup() %>%   
   group_by(station_code, program_start_time, program_time) %>% 
-  summarise(shift_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  summarise(shift_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
   ungroup() %>% 
   dplyr::collect()  
 ```
@@ -220,11 +220,11 @@ difftime <- play %>%
   group_by(house_num, tv_num, station_code, program_start_time, program_time) %>% 
   summarise(watch_time = count(timeshift_datetime)) %>% 
   ungroup() %>% 
-  group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
-  summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
-  ungroup() %>%   
+  #group_by(house_num, station_code, program_start_time, program_time) %>% # 複数台TVがついている場合は, 最大値を世帯視聴時間とする
+  #summarise(house_watch_time = max(watch_time,na.rm = TRUE)) %>% 
+  #ungroup() %>%   
   group_by(station_code, program_start_time, program_time) %>% 
-  summarise(diff_watch = sum(house_watch_time,na.rm = TRUE) / program_time) %>% 
+  summarise(diff_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
   ungroup() %>% 
   dplyr::collect()  
 ```
@@ -279,6 +279,17 @@ write_csv(alltime,"~/Desktop/DataComp2018/data/watch_rate.csv")
 head(alltime)
 ```
 
+- 有効な値について 
+    - リアルタイム視聴率: 107922
+    - タイムシフト視聴率: 75993
+    - 総合視聴率: 107976
+    
+```{r}
+alltime %>% select(real_watch_rate) %>% na.omit %>% NROW
+alltime %>% select(shift_watch_rate) %>% na.omit %>% NROW
+alltime %>% select(all_watch_rate) %>% na.omit %>% NROW
+```
+
 ## ヒストグラム
 
 - 各視聴率のヒストグラム
@@ -307,25 +318,35 @@ alltime %>%
 
 ## Violin Plot
 
+- 平均値と+/- mult * SDを表す
+
 ```{r}
-ggplot(alltime,aes(factor(station_code), real_watch_rate)) +
-  geom_violin() + 
+ggplot(alltime,aes(factor(station_code), real_watch_rate, colour = factor(station_code))) +
+  geom_violin(trim=FALSE) + 
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = FALSE) +
   labs(y = "リアルタイム視聴率", x="チャンネル") 
 ```
 
 ```{r}
-ggplot(alltime,aes(factor(station_code), shift_watch_rate)) +
-  geom_violin() + 
+ggplot(alltime,aes(factor(station_code), shift_watch_rate, colour = factor(station_code))) +
+  geom_violin(trim=FALSE) + 
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = FALSE) +
   labs(y = "タイムシフト視聴率", x="チャンネル") 
 ```
 
 ```{r}
-ggplot(alltime,aes(factor(station_code), all_watch_rate)) +
-  geom_violin() + 
+p1 <- ggplot(alltime,aes(factor(station_code), all_watch_rate, colour = factor(station_code))) +
+  geom_violin(trim=FALSE) + 
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = FALSE) +
   labs(y = "総合視聴率", x="チャンネル") 
+
+ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとの総合視聴率(ViolinPlot).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ## カラムの関係性
@@ -410,7 +431,7 @@ alltime %>%
 パターンある. 平均で予測できてしまっているのではないか??
 
 ```{r}
-alltime %>% 
+p1 <- alltime %>% 
   # filter(month(program_start_time) == "9") %>% 
   ggplot(aes(x=program_start_time, real_watch_rate)) +
     geom_line(aes(color = factor(station_code))) +
@@ -421,7 +442,8 @@ alltime %>%
     theme(axis.text.x = element_text(angle = 30, hjust = 1),
           axis.title.x = element_blank()) +
     facet_zoom(xy = month(program_start_time) == "11", horizontal = FALSE)
-  
+
+ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとの総合視聴率(timeseries).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 # 従来手法の妥当性について
@@ -487,14 +509,14 @@ alltime2 %>% head()
 
 ```{r}
 formula <- y ~ x
-alltime2 %>% 
+p1 <- alltime2 %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),
-               formula = formula, parse = TRUE) + 
+  stat_poly_eq(aes(label =  paste(..adj.rr.label..)), formula = formula, parse = TRUE, size=10) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="予測視聴率", x="実測値") 
+ggsave(file = "~/Desktop/DataComp2018/image/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ```{r}
@@ -504,5 +526,30 @@ alltime2 %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = guide_legend(title = "チャンネル")) +
   labs(y ="予測視聴率", x="実測値") 
+```
+
+# 予測モデルの構築
+
+- 1ヶ月前のデータで予測する.
+
+```{r}
+pred <- alltime2 %>% 
+  group_by(station_code) %>% 
+  nest() %>% 
+  dplyr::mutate(lm_model = purrr::map(data, ~ lm(all_watch_rate ~ rate4, data = .))) %>% 
+  mutate(pred_rate = map2(lm_model, data, predict)) %>% 
+  unnest(pred_rate, data)
+```
+
+```{r}
+formula <- y ~ x
+p1 <- pred %>% 
+  ggplot(aes(x=all_watch_rate,y=pred_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(aes(label =  paste(..adj.rr.label..)), formula = formula, parse = TRUE, size=10) + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="予測視聴率", x="実測値") 
+ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとに1ヶ月前データにより単回帰で算出した予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
