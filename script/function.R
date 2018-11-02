@@ -1,7 +1,11 @@
 ### 関数 ###
+# pick: useful filter function
 # MeanWatchRate: 過去4週間の視聴率データを結合する関数
-
 ############ 
+# pick
+pick <- function(condition){
+  function(d) d %>% filter_(condition)
+}
 
 # MeanWatchRate
 MeanWatchRate <- function(tmp){
