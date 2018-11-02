@@ -536,6 +536,8 @@ write_csv(alltime2,"~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 alltime2 %>% head()
 ```
 
+### 平均予測 / 実測値
+
 - かなり的中率良い
 - 逆に言えば簡単なモデルでも予測できるんじゃないか??
 
@@ -551,19 +553,72 @@ p1 <- alltime2 %>%
 p1
 ```
 
-```{r}
+- save 
+
+```{r eval=FALSE}
 ggsave(file = "~/Desktop/DataComp2018/image/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
+
+- チャンネル毎
 
 ```{r}
 alltime2 %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   geom_point(aes(colour = factor(station_code))) +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = guide_legend(title = "チャンネル")) +
   labs(y ="予測視聴率", x="実測値") 
 ```
 
+- 番組大分類毎
+
+```{r}
+alltime2 %>% 
+  left_join(program %>% 
+              select(station_code, program_start_time, ban_code1),
+            by = c("station_code", "program_start_time")) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point(aes(colour = factor(ban_code1))) +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = guide_legend(title = "大分類")) +
+  labs(y ="予測視聴率", x="実測値") 
+```
+
+- 新番組 or 普通
+
+```{r}
+alltime2 %>% 
+  left_join(program %>% 
+              select(station_code, program_start_time, sin_toku),
+            by = c("station_code", "program_start_time")) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point(aes(colour = factor(sin_toku))) +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = guide_legend(title = "番組特性")) +
+  labs(y ="予測視聴率", x="実測値") 
+```
+
+- 最終回 or そうでない
+
+```{r}
+alltime2 %>% 
+  left_join(program %>% 
+              select(station_code, program_start_time, final_code),
+            by = c("station_code", "program_start_time")) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point(aes(colour = factor(final_code))) +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = guide_legend(title = "最終回フラグ")) +
+  labs(y ="予測視聴率", x="実測値") 
+```
 # 予測モデルの構築
 
 - 1ヶ月前のデータで予測する.
