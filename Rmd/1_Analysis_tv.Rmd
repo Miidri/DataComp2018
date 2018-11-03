@@ -1,0 +1,109 @@
+---
+title: "Data analysis tv"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## packages
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(ggforce)
+library(scales)
+library(doParallel)
+library(foreach)
+library(DT)
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## functions
+
+```{r}
+source('~/Desktop/DataComp2018/script/function.R')
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+## load data
+
+```{r}
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+```
+
+# 予測モデルの構築
+
+- 1ヶ月前のデータで予測する.
+
+```{r}
+pred <- alltime2 %>% 
+  group_by(station_code) %>% 
+  nest() %>% 
+  dplyr::mutate(lm_model = purrr::map(data, ~ lm(all_watch_rate ~ rate4, data = .))) %>% 
+  mutate(pred_rate = map2(lm_model, data, predict)) %>% 
+  unnest(pred_rate, data)
+```
+
+```{r}
+formula <- y ~ x
+p1 <- pred %>% 
+  ggplot(aes(x=all_watch_rate,y=pred_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="予測視聴率", x="実測値") 
+p1
+```
+
+```{r}
+ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとに1ヶ月前データにより単回帰で算出した予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
