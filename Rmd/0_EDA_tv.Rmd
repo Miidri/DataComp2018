@@ -326,9 +326,9 @@ alltime %>%
 
 ```{r}
 ggplot(alltime,aes(factor(station_code), real_watch_rate, colour = factor(station_code))) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = FALSE) +
   labs(y = "リアルタイム視聴率", x="チャンネル") 
 ```
@@ -353,7 +353,7 @@ p1
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとの総合視聴率(ViolinPlot).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合視聴率(ViolinPlot).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ## カラムの関係性
@@ -453,7 +453,7 @@ p1
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとの総合視聴率(timeseries).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合視聴率(timeseries).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ## 番組情報との関係性
@@ -471,7 +471,7 @@ ggsave(file = "~/Desktop/DataComp2018/image/チャンネルごとの総合視聴
 ### 大分類
 
 ```{r}
-alltime %>% 
+p1 <- alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
                      sin_toku, br_format, final_code),
@@ -483,12 +483,17 @@ alltime %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = FALSE) +
   labs(x = "大分類",y = "総合視聴率") 
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの大分類別視聴率.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ### 番組特性
 
 ```{r}
-alltime %>% 
+p1 <- alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
                      sin_toku, br_format, final_code),
@@ -500,8 +505,12 @@ alltime %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = FALSE) +
   labs(x = "番組特性",y = "総合視聴率") 
+p1
 ```
 
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの番組特性別視聴率.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
 ### 新番組フラグ
 
 ```{r}
@@ -612,67 +621,71 @@ p1
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ### チャンネル毎の平均予測 / 実測値
 
 ```{r}
-alltime2 %>% 
+p1 <- alltime2 %>% 
+  group_by(station_code) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(station_code = paste0(station_code, "; n=", count)) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   facet_wrap(~station_code, ncol=4) +
   geom_point() +
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="予測視聴率", x="実測値")
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ### 番組大分類毎の平均予測 / 実測値
 
 ```{r}
-alltime2 %>% 
+p1 <- alltime2 %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1),
             by = c("station_code", "program_start_time")) %>% 
+  group_by(ban_code1) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(ban_code1 = paste0(ban_code1, "; n=", count)) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   facet_wrap(~ban_code1, ncol=4) +
   geom_point() +
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="予測視聴率", x="実測値") 
+p1
 ```
 
-### 新番組 or 普通の平均予測 / 実測値
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/番組大分類ごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
+### (新番組 or 普通) + (最終回 or 通常) の平均予測 / 実測値
 
 ```{r}
-alltime2 %>% 
+p1 <-alltime2 %>% 
   left_join(program %>% 
-              select(station_code, program_start_time, sin_toku),
+              select(station_code, program_start_time, sin_toku, final_code),
             by = c("station_code", "program_start_time")) %>% 
+  mutate(sin_toku_ = factor(sin_toku, labels = c("通常", "新番組")),
+         final_code_ = factor(final_code, labels = c("通常", "最終回"))) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
-  facet_wrap(~sin_toku, ncol=2) +
+  facet_grid(sin_toku_ ~ final_code_) +
   geom_point() +
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="予測視聴率", x="実測値") 
+p1
 ```
-
-### 最終回 or 通常の平均予測 / 実測値
-
-```{r}
-alltime2 %>% 
-  left_join(program %>% 
-              select(station_code, program_start_time, final_code),
-            by = c("station_code", "program_start_time")) %>% 
-  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
-  facet_wrap(~final_code, ncol=2) +
-  geom_point() +
-  geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="予測視聴率", x="実測値") 
-```
-
