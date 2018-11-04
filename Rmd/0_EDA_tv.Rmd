@@ -76,9 +76,13 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 ## load data
 
 ```{r}
+# load csv
 alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
 alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+# 必要なデータ
 program <- program %>% dplyr::collect()
+ban1 <- ban1 %>% dplyr::collect()
+sta <- sta %>% dplyr::collect()
 ```
 
 # Dataset overview
@@ -326,16 +330,21 @@ alltime %>%
 - 平均値と+/- mult * SDを表す
 
 ```{r}
-ggplot(alltime,aes(factor(station_code), real_watch_rate, colour = factor(station_code))) +
+alltime %>% 
+  left_join(sta,by="station_code") %>% 
+  ggplot(aes(factor(station_jp), real_watch_rate, colour = factor(station_jp))) +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   guides(colour = FALSE) +
-  labs(y = "リアルタイム視聴率", x="チャンネル") 
+  labs(y = "リアルタイム視聴率", x="チャンネル") +
+  theme(axis.title.x = element_blank())
 ```
 
 ```{r}
-ggplot(alltime,aes(factor(station_code), shift_watch_rate, colour = factor(station_code))) +
+alltime %>% 
+  left_join(sta,by="station_code") %>% 
+  ggplot(aes(factor(station_jp), shift_watch_rate, colour = factor(station_jp))) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
@@ -344,12 +353,16 @@ ggplot(alltime,aes(factor(station_code), shift_watch_rate, colour = factor(stati
 ```
 
 ```{r}
-p1 <- ggplot(alltime,aes(factor(station_code), all_watch_rate, colour = factor(station_code))) +
+p1 <-
+  alltime %>% 
+  left_join(sta,by="station_code") %>% 
+  ggplot(aes(factor(station_jp), all_watch_rate, colour = factor(station_jp))) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   guides(colour = FALSE) +
-  labs(y = "総合視聴率", x="チャンネル") 
+  labs(y = "総合視聴率", x="チャンネル") +
+  theme(axis.title.x = element_blank())
 p1
 ```
 
@@ -440,9 +453,9 @@ alltime %>%
 
 ```{r}
 p1 <- alltime %>% 
-  # filter(month(program_start_time) == "9") %>% 
-  ggplot(aes(x=program_start_time, real_watch_rate)) +
-    geom_line(aes(color = factor(station_code))) +
+  left_join(sta,by="station_code") %>% 
+  ggplot(aes(x=program_start_time, all_watch_rate)) +
+    geom_line(aes(color = factor(station_jp))) +
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
     theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     guides(colour = guide_legend(title = "チャンネル")) +
