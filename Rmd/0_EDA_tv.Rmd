@@ -54,6 +54,7 @@ library(scales)
 library(doParallel)
 library(foreach)
 library(DT)
+library(gridExtra)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
@@ -616,7 +617,7 @@ p1 <- alltime2 %>%
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="予測視聴率", x="実測値") 
+  labs(y ="推定視聴率", x="実測値") 
 p1
 ```
 
@@ -638,7 +639,7 @@ p1 <- alltime2 %>%
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="予測視聴率", x="実測値")
+  labs(y ="推定視聴率", x="実測値")
 p1
 ```
 
@@ -663,7 +664,7 @@ p1 <- alltime2 %>%
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="予測視聴率", x="実測値") 
+  labs(y ="推定視聴率", x="実測値") 
 p1
 ```
 
