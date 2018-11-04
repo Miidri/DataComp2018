@@ -14,8 +14,8 @@ For the working process
 
 ## Rmd
 
-- 0 : EDA for each
-
+- 0 : EDA for each data and for slide
+- 1 : A
 ## script
  
 - sql_connect.R : SQL接続情報, no push
@@ -32,15 +32,18 @@ For the working process
 ├── DataComp2018.Rproj
 ├── README.md
 ├── Rmd
+├── Rmd
+│   ├── 0_EDA_Sample_user.Rmd
 │   ├── 0_EDA_check_house_number.Rmd
 │   ├── 0_EDA_check_house_number.html
+│   ├── 0_EDA_for_slide.Rmd
 │   ├── 0_EDA_t_weblog.Rmd
 │   ├── 0_EDA_t_weblog.html
 │   ├── 0_EDA_t_weblog_about_unique.Rmd
 │   ├── 0_EDA_t_weblog_about_unique.html
 │   ├── 0_EDA_tv.Rmd
 │   ├── 0_EDA_tv.html
-│   └── 1_Analysis_slide.Rmd
+│   └── 1_Analysis_tv.Rmd
 ├── data
 │   ├── watch_rate.csv
 │   ├── watch_rate_pre.csv
