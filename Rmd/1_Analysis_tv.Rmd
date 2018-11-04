@@ -78,6 +78,151 @@ alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
 alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 ```
 
+# 従来手法の妥当性について
+
+- 過去四週間の視聴率の平均値を, 予測値として扱うことの妥当性を検証する.
+
+## データ形成
+
+*処理に時間がかかるため, csvに書き出す*
+
+- 5月以降のデータについて, 過去4週間のデータの平均値を基に推定し, 実測値と比較.
+- 効率化のため, チャンネル毎にテーブルを分割して処理をする.
+- 1週間ずつ戻して,開始時刻が一致する場合はその視聴率を使用し, 一致しない場合は対象のtvの開始時刻が含まれる1週間前のtvで代用する.
+
+```{r, eval=FALSE}
+# 必要な情報を抽出
+tmp1 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 1) %>% MeanWatchRate()
+tmp2 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 2) %>% MeanWatchRate()
+tmp3 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 3) %>% MeanWatchRate()
+tmp4 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 4) %>% MeanWatchRate()
+tmp5 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>%
+  filter(station_code == 5) %>% MeanWatchRate()
+tmp6 <- alltime %>% 
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 6) %>% MeanWatchRate()
+tmp7 <- alltime %>%
+  select(station_code, program_start_time, all_watch_rate) %>% 
+  filter(station_code == 7) %>% MeanWatchRate()
+```
+
+- 全てのデータを結合し, 元に戻す.
+
+```{r, eval=FALSE}
+alltime2 <- bind_rows(tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7) %>% 
+  mutate(mean_rate = rowMeans(select(., rate1,rate2,rate3,rate4), na.rm = TRUE))
+```
+
+- save
+
+```{r, eval=FALSE}
+write_csv(alltime2,"~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+```
+
+## 結果の可視化
+
+- check
+
+```{r}
+alltime2 %>% head()
+```
+
+### 平均予測 / 実測値
+
+- かなり的中率良い
+- 逆に言えば簡単なモデルでも予測できるんじゃないか??
+
+```{r}
+formula <- y ~ x
+p1 <- alltime2 %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="推定視聴率", x="実測値") 
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
+### チャンネル毎の平均予測 / 実測値
+
+```{r}
+p1 <- alltime2 %>% 
+  group_by(station_code) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(station_code = paste0(station_code, "; n=", count)) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  facet_wrap(~station_code, ncol=4) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="推定視聴率", x="実測値")
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
+### 番組大分類毎の平均予測 / 実測値
+
+```{r}
+p1 <- alltime2 %>% 
+  left_join(program %>% 
+              select(station_code, program_start_time, ban_code1),
+            by = c("station_code", "program_start_time")) %>% 
+  group_by(ban_code1) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  mutate(ban_code1 = paste0(ban_code1, "; n=", count)) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  facet_wrap(~ban_code1, ncol=4) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="推定視聴率", x="実測値") 
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/番組大分類ごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
+### (新番組 or 普通) + (最終回 or 通常) の平均予測 / 実測値
+
+```{r}
+p1 <-alltime2 %>% 
+  left_join(program %>% 
+              select(station_code, program_start_time, sin_toku, final_code),
+            by = c("station_code", "program_start_time")) %>% 
+  mutate(sin_toku_ = factor(sin_toku, labels = c("通常", "新番組")),
+         final_code_ = factor(final_code, labels = c("通常", "最終回"))) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  facet_grid(sin_toku_ ~ final_code_) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="予測視聴率", x="実測値") 
+p1
+```
+
 # 基本的な予測モデル
 
 - いろんなモデルをつくって, 確認してみる
