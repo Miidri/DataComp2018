@@ -53,6 +53,7 @@ library(scales)
 library(doParallel)
 library(foreach)
 library(DT)
+library(gridExtra)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
@@ -161,47 +162,45 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/過去4週間分のデータ�
 
 ```{r}
 p1 <- alltime2 %>% 
-  group_by(station_code) %>%
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
+  group_by(station_jp) %>% 
   mutate(count = n()) %>%
   ungroup() %>%
-  mutate(station_code = paste0(station_code, "; n=", count)) %>% 
+  mutate(station_jp = paste0(station_jp, "; n=", count)) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
-  facet_wrap(~station_code, ncol=4) +
+  facet_wrap(~station_jp, ncol=3) +
   geom_point() +
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.17, size=8, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="推定視聴率", x="実測値")
 p1
 ```
 
-```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
-```
-
 ### 番組大分類毎の平均予測 / 実測値
 
 ```{r}
-p1 <- alltime2 %>% 
-  left_join(program %>% 
-              select(station_code, program_start_time, ban_code1),
+p2 <- alltime2 %>% 
+  left_join(program %>% dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
-  group_by(ban_code1) %>%
+  left_join(ban1 %>% dplyr::collect(),by="ban_code1") %>% 
+  group_by(ban_code1_naiyou) %>%
   mutate(count = n()) %>%
   ungroup() %>%
-  mutate(ban_code1 = paste0(ban_code1, "; n=", count)) %>% 
+  mutate(ban_code1_naiyou = paste0(ban_code1_naiyou, "; n=", count)) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
-  facet_wrap(~ban_code1, ncol=4) +
+  facet_wrap(~ban_code1_naiyou, ncol=3) +
   geom_point() +
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=10, color = "magenta3") + 
+  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.17, size=8, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="推定視聴率", x="実測値") 
-p1
+p2
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/basic/番組大分類ごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+p <- grid.arrange(p1,p2,ncol=2)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/番組特性ごとの従来手法による予測視聴率と総合視聴率の関係性.png", plot = p, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 ### (新番組 or 普通) + (最終回 or 通常) の平均予測 / 実測値
