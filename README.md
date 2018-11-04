@@ -15,7 +15,8 @@ For the working process
 ## Rmd
 
 - 0 : EDA for each data and for slide
-- 1 : A
+- 1 : Analysis for data
+
 ## script
  
 - sql_connect.R : SQL接続情報, no push
