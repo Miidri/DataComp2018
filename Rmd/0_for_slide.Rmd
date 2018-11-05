@@ -148,7 +148,7 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/標本情報基礎集計(性�
 ```
 
 
-### TVに関する諸情報
+### 番組関する諸情報
 
 ```{r}
 p1 <- program %>% 
@@ -163,7 +163,7 @@ p1 <- program %>%
     geom_bar(stat = "identity",fill = "steelblue") +
     coord_flip() +
     theme(axis.title.x = element_blank()) +
-    labs(x="チャンネル") 
+    labs(x="チャンネル")
 
 p2 <- program %>% 
   left_join(br_format,by="br_format") %>% 
@@ -190,8 +190,7 @@ p3 <- program %>%
     theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
     coord_flip() +
-    theme(axis.title.x = element_blank()) +
-    labs(x="番組大分類") 
+    labs(x="大分類",y="番組数") 
 p <- gridExtra::grid.arrange(p1,p2,p3,nrow=3)
 ```
 
@@ -212,12 +211,11 @@ p1 <- cm %>%
     theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
     coord_flip() +
-    theme(axis.title.x = element_blank()) +
-    labs(x="広告種類") 
+    labs(x="広告種類", y="コマーシャル数") 
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/basic/CMの基礎集計(広告種類).png", plot = p1, dpi = 100, width = 10, height = 9.3)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/CMの基礎集計(広告種類).png", plot = p1, dpi = 100, width = 15, height = 9.3)
 ```
 
 ### Web閲覧
@@ -248,9 +246,8 @@ p1 <- tmp %>%
     scale_colour_manual(name = '曜日', values =c("0"='steelblue',"6"='magenta3'), 
                       labels = c('土曜日','日曜日')) +
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
-    labs(y = "アクセス数") +
-    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-    theme(axis.title.x = element_blank())
+    labs(y = "WEBアクセス数",x="日付") +
+    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3"))
 ```
 
 - ユーザの端末情報
@@ -876,10 +873,9 @@ p2 <- tmp %>%
   #top_n(30,count) %>% 
   ggplot(aes(x=reorder(os,-count), y=count)) + 
   geom_bar(stat = "identity", fill = "steelblue") +
-  labs(y = "アクセス数") +
+  labs(y = "WEBアクセス数",x="pc端末名") +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  theme(axis.text.x = element_text(angle = 30,hjust = 1),
-          axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = 30,hjust = 1))
 ```
 
 ```{r}
@@ -889,10 +885,9 @@ p3 <- tmp %>%
   top_n(25,count) %>% 
   ggplot(aes(x=reorder(os,-count), y=count)) + 
   geom_bar(stat = "identity", fill = "steelblue") +
-  #labs(y = "アクセス数") +
+  labs(x = "モバイル端末名") +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   theme(axis.text.x = element_text(angle = 30,hjust = 1),
-        axis.title.x = element_blank(),
         axis.title.y = element_blank())
 ```
 
