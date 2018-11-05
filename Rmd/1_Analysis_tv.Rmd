@@ -258,6 +258,7 @@ ggsave(file = "~/Desktop/DataComp2018/image/analysis/チャンネルごとに1�
 ### チャンネル毎の平均予測 / 実測値
 
 ```{r}
+options(scipen=1)
 p1 <- pred %>% 
   group_by(station_code) %>%
   mutate(count = n()) %>%
