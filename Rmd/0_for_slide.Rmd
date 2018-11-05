@@ -70,6 +70,84 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 
 ## 基礎集計用
 
+### 標本情報
+
+- 性別
+
+```{r}
+p1 <- sample %>%
+  group_by(sex) %>% 
+  summarise(num=n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(factor(sex, labels = c("男性","女性")),num)) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.title.x = element_blank()) +
+    labs(y="標本数")
+```
+
+- 結婚の有無
+
+```{r}
+options(scipen=2)
+p2 <- sample %>%
+  group_by(marriage) %>% 
+  summarise(num=n()) %>% 
+  ungroup() %>% 
+  dplyr::collect() %>% 
+  ggplot(aes(factor(marriage, labels = c("未婚","既婚")),num)) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.title.x = element_blank()) +
+    labs(y="標本数")
+```
+
+- 年齢
+
+```{r}
+options(scipen=2)
+tmp <- sample %>%
+  select(age) %>% 
+  dplyr::collect()
+
+p3 <- ggplot(tmp,aes(age)) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    geom_histogram(fill = "steelblue",bins = 50) +
+    labs(x = "年齢",y="標本数")
+```
+
+### 職業
+
+```{r}
+tmp <- sample %>% 
+  dplyr::collect() %>% 
+  left_join(
+    data.frame(job,job2 = c("大学生","高校生","各種学校生/予備校生","中学生","小学生","経営/管理職","専門職/自由業","乳幼児/未就学児",
+                            "農業/漁業/林業","商工自営業","パートタイマー", "その他","専業主婦","無職","給料技能/作業職","給料事務/技術職")),
+    by="job_code") %>% 
+  group_by(job2) %>% 
+  summarise(num = n()) %>% 
+  ungroup()
+
+p4 <- ggplot(tmp,
+       aes(factor(job2, 
+                  levels = c("大学生","高校生","各種学校生/予備校生","中学生","小学生","乳幼児/未就学児","専業主婦","パートタイマー",
+                             "経営/管理職","給料技能/作業職","給料事務/技術職","専門職/自由業","農業/漁業/林業","商工自営業","無職","その他")),
+           num)) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 30,hjust = 1),
+          axis.title.x = element_blank()) +
+    labs(y="標本数")
+```
+
+```{r}
+p <- grid.arrange(p1,p2,p3,p4,nrow=2)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/標本情報基礎集計(性別と年齢と未既婚と職業).png", plot = p, dpi = 100, width = 19.73, height = 9.3)
+```
+
+
 ### TVに関する諸情報
 
 ```{r}
