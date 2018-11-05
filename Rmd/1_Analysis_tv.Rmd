@@ -150,7 +150,8 @@ p1 <- alltime2 %>%
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="推定視聴率", x="実測値") 
+  labs(y ="従来手法による推定視聴率", x="実際の視聴率", 
+       title="観測期間: 2017/5/1 - 2018/4/1, 標本数: 99491") 
 p1
 ```
 
@@ -173,7 +174,8 @@ p1 <- alltime2 %>%
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.17, size=8, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-  labs(y ="推定視聴率", x="実測値")
+  labs(y ="従来手法による推定視聴率", x="実際の視聴率", 
+       title="観測期間: 2017/5/1 - 2018/4/1, 標本数: 99491") 
 p1
 ```
 
