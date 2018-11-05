@@ -14,6 +14,7 @@ For the working process
 
 ## Rmd
 
+基本的にスライド用の図等は, O_for_slide.Rmdで編集. 0_EDAは細部で気になる点はメモ残して, スライド使用時に編集する
 - 0 : EDA for each data and for slide
 - 1 : Analysis for data
 
@@ -33,19 +34,18 @@ For the working process
 ├── DataComp2018.Rproj
 ├── README.md
 ├── Rmd
-├── Rmd
 │   ├── 0_EDA_Sample_user.Rmd
 │   ├── 0_EDA_check_house_number.Rmd
 │   ├── 0_EDA_check_house_number.html
-│   ├── 0_EDA_for_slide.Rmd
 │   ├── 0_EDA_t_weblog.Rmd
 │   ├── 0_EDA_t_weblog.html
 │   ├── 0_EDA_t_weblog_about_unique.Rmd
 │   ├── 0_EDA_t_weblog_about_unique.html
 │   ├── 0_EDA_tv.Rmd
 │   ├── 0_EDA_tv.html
+│   ├── 0_for_slide.Rmd
 │   └── 1_Analysis_tv.Rmd
-├── data
+│─ data
 │   ├── watch_rate.csv
 │   ├── watch_rate_pre.csv
 │   └── 接触ログと再生ログのイメージ.xlsx
