@@ -145,7 +145,7 @@ XgboostPred <- function(xgb_params,train_data,test_data){
            params = xgb_params,
            missing = NA,
            nfold = 3,
-           nrounds = 100,
+           nrounds = 1000,
            verbose = TRUE,
            prediction = TRUE,                                           # return the prediction using the final model 
            showsd = TRUE,                                               # standard deviation of loss across folds
