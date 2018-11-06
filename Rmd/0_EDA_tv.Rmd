@@ -192,7 +192,7 @@ timeshift <- play %>%
   group_by(station_code, program_start_time, program_time) %>% 
   summarise(shift_watch = sum(watch_time,na.rm = TRUE) / program_time) %>% 
   ungroup() %>% 
-  dplyr::collect()  
+  dplyr::collect()
 ```
 
 ```{r eval=FALSE}
