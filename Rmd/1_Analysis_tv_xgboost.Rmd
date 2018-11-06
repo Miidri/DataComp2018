@@ -1,0 +1,167 @@
+---
+title: "Data analysis tv"
+output: 
+    html_document:
+      md_extensions: -ascii_identifiers
+      toc: true
+      toc_depth: 3
+      code_folding: hide
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## packages
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(ggforce)
+library(scales)
+library(doParallel)
+library(foreach)
+library(DT)
+library(gridExtra)
+library(xgboost)
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## functions
+
+```{r}
+source('~/Desktop/DataComp2018/script/function.R')
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+## load data
+
+```{r}
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+```
+
+# Preprocess
+
+```{r}
+# 特徴量作成, 特徴量と視聴率3つを残す
+alltime %>% 
+  left_join(program %>% 
+              select(station_code,program_start_time,ban_code1,ban_code2,ban_code3,
+                     sin_toku,br_format,final_code) %>% 
+              dplyr::collect(),
+            by = c("station_code","program_start_time")) %>% 
+  mutate(Wday = wday(program_start_time),
+         Month = month(program_start_time),
+         Hour = hour(program_start_time),
+         ban_code3 = ban_code3 %>% as.factor() %>% as.numeric(),
+         sin_toku = sin_toku %>% as.factor() %>% as.numeric(),
+         id = row_number()) %>% 
+  select(-c(program_start_time,real_watch,shift_watch,all_watch)) -> tmp
+```
+
+```{r}
+train_data <- tmp[1:90000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
+test_data <- tmp[90001:108086,]
+```
+
+# XGBoost
+
+## parameter
+
+```{r}
+# xgboost fitting with arbitrary parameters
+xgb_params <- list(objective = "reg:logistic",
+                   booster = "gbtree",
+                   eval_metric = "rmse",
+                   nthread = 8,
+                   eta = 0.05,
+                   max_depth = 5,
+                   min_child_weight = 30,
+                   gamma = 0,
+                   subsample = 0.85,
+                   colsample_bytree = 0.65,
+                   alpha = 0,
+                   lambda = 0,
+                   nrounds = 2000)
+```
+
+## model
+
+```{r}
+XgboostPred <- function(xgb_params,train_data,test_data){
+  # set data
+  train <- train_data %>% 
+    select(-c(id,real_watch_rate,shift_watch_rate)) %>% 
+    data.matrix()
+  test <- test_data %>% 
+    select(-c(id,real_watch_rate,shift_watch_rate,all_watch_rate)) %>% 
+    data.matrix()
+  target <- train_data$all_watch_rate
+  # set seed
+  set.seed(831)
+  # xgboost cross validation to choice best parameter
+  xgb_cv <- 
+    xgb.cv(data = xgb.DMatrix(data = train, label = target),
+           params = xgb_params,
+           missing = NA,
+           nfold = 3,
+           nrounds = 100,
+           verbose = TRUE,
+           prediction = TRUE,                                           # return the prediction using the final model 
+           showsd = TRUE,                                               # standard deviation of loss across folds
+           stratified = TRUE, 
+           print_every_n = 10,
+           early_stopping_rounds = 200 )
+  # xgboost modeling  
+  xgb_model <- 
+    xgboost(data = xgb.DMatrix(data = train, label = target),
+            params = xgb_params,
+            nrounds = xgb_cv$best_iteration, # max number of trees to build
+            verbose = TRUE,                                         
+            print_every_n = 10,
+            early_stopping_rounds = 200 )
+  # predict
+  pred_test <- predict(xgb_model,test)
+}
+```
+
