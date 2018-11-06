@@ -1,6 +1,7 @@
 # crow program info
 # url: http://timetable.yanbe.net/?p=13
 import requests, logging, sys, urllib, re
+import pandas as pd
 from bs4 import BeautifulSoup
 
 ## make url
@@ -20,3 +21,12 @@ for tr in program_name:
 
 for tr in program_info:
   print(tr.string)
+  
+## 結果を格納する
+name_links = []
+info_links = []
+for tr in program_name:
+  name_links.append(tr.string)
+for tr in program_info:
+  info_links.append(tr.string)
+ans = pd.DataFrame({'program_name' : name_links, 'program_info': info_links})
