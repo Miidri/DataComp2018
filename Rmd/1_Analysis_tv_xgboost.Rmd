@@ -55,6 +55,7 @@ library(foreach)
 library(DT)
 library(gridExtra)
 library(xgboost)
+library(ggpmisc)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
@@ -84,24 +85,25 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 
 ```{r}
 # 特徴量作成, 特徴量と視聴率3つを残す
-alltime %>% 
+# 平均視聴率と比較するために, 1ヶ月分減らした, alltime2を使用する
+alltime2 %>% 
   left_join(program %>% 
               select(station_code,program_start_time,ban_code1,ban_code2,ban_code3,
-                     sin_toku,br_format,final_code) %>% 
+                     sin_toku,br_format,final_code,program_time) %>% 
               dplyr::collect(),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time),
          Month = month(program_start_time),
          Hour = hour(program_start_time),
          ban_code3 = ban_code3 %>% as.factor() %>% as.numeric(),
-         sin_toku = sin_toku %>% as.factor() %>% as.numeric(),
-         id = row_number()) %>% 
-  select(-c(program_start_time,real_watch,shift_watch,all_watch)) -> tmp
+         sin_toku = sin_toku %>% as.factor() %>% as.numeric()) %>% 
+  # select(-c(real_watch,shift_watch,all_watch)) -> tmp # alltime用
+  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) -> tmp
 ```
 
 ```{r}
-train_data <- tmp[1:90000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
-test_data <- tmp[90001:108086,]
+train_data <- tmp[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
+test_data <- tmp[80001:99598,]
 ```
 
 # XGBoost
@@ -131,10 +133,10 @@ xgb_params <- list(objective = "reg:logistic",
 XgboostPred <- function(xgb_params,train_data,test_data){
   # set data
   train <- train_data %>% 
-    select(-c(id,real_watch_rate,shift_watch_rate)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate)) %>% 
     data.matrix()
   test <- test_data %>% 
-    select(-c(id,real_watch_rate,shift_watch_rate,all_watch_rate)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate)) %>% 
     data.matrix()
   target <- train_data$all_watch_rate
   # set seed
@@ -144,8 +146,8 @@ XgboostPred <- function(xgb_params,train_data,test_data){
     xgb.cv(data = xgb.DMatrix(data = train, label = target),
            params = xgb_params,
            missing = NA,
-           nfold = 3,
-           nrounds = 1000,
+           nfold = 4,
+           nrounds = 2000,
            verbose = TRUE,
            prediction = TRUE,                                           # return the prediction using the final model 
            showsd = TRUE,                                               # standard deviation of loss across folds
@@ -168,12 +170,31 @@ XgboostPred <- function(xgb_params,train_data,test_data){
 ## 可視化
 
 ```{r}
-test %>% 
-  mutate(pred = pred_test) %>% 
+formula <- y ~ x
+data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=pred)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = formula) +
-  stat_poly_eq(formula = formula, parse = TRUE, label.y = 0.2, size=12, color = "magenta3") + 
+  stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
 ```
+
+```{r}
+formula <- y ~ x
+data.frame(test_data,pred = pred_test) %>% 
+  ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```
+
+# lm
+
+```{r}
+model1 <- lm(all_watch_rate ~ . -program_start_time -all_watch_rate - mean_rate, data = train_data)
+pred <- predict(model1,test_data)
+plot(test_data$all_watch_rate,pred)
+```
+
 
