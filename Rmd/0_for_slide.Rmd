@@ -200,6 +200,8 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/番組情報の基礎集計(�
 
 ### CM時点データ
 
+- 広告種類
+
 ```{r}
 p1 <- cm %>% 
   left_join(adv, "adv_type") %>% 
@@ -211,11 +213,42 @@ p1 <- cm %>%
     theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
     coord_flip() +
-    labs(x="広告種類", y="コマーシャル数") 
+    labs(x="広告種類", y="年間CM放送回数") 
+```
+
+- 企業別広告件数(上位10個)
+
+```{r}
+dataset <- dbGetQuery(con,"select
+B.adv_name AS adv_name,
+count(*)
+from
+edit.tv_program_cm AS A
+left join
+processed.m_cm_tv_advertiser AS B
+ON
+A.adv_code LIKE B.adv_code
+WHERE
+station_code <= 5
+GROUP BY
+B.adv_name
+ORDER BY 2 DESC")
+
+plot_d <- dataset[c(1:10),]
+plot_d$adv_name <- gsub(' ','',plot_d$adv_name)
+
+plot_d$adv_name[8] <- paste(substr(plot_d$adv_name[8], 1, 9),
+                            substr(plot_d$adv_name[8], 10, 15),sep="\n")
+p2 <- ggplot(plot_d,aes(x=reorder(adv_name,-count),y=count)) +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  geom_bar(stat = "identity",fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 30, hjust=1))+
+  xlab("企業名")+ ylab("年間CM放送回数")
+p <- gridExtra::grid.arrange(p1,p2,nrow=2)
 ```
 
 ```{r eval=FALSE}
-ggsave(file = "~/Desktop/DataComp2018/image/basic/CMの基礎集計(広告種類).png", plot = p1, dpi = 100, width = 15, height = 9.3)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/CMの基礎集計(広告種類と企業ごと).png", plot = p, dpi = 100, width = 10, height = 9.3)
 ```
 
 ### Web閲覧
@@ -895,3 +928,7 @@ p3 <- tmp %>%
 p <- grid.arrange(p1,p2,p3, layout_matrix = rbind(c(1, 1),c(2, 3)))
 ggsave(file = "~/Desktop/DataComp2018/image/basic/web基礎集計(時系列とpcアクセスとスマホアクセス).png", plot = p, dpi = 100, width = 19.73, height = 9.3)
 ```
+
+## アンケート
+
+- データだけで良いかも?
