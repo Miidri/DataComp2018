@@ -97,7 +97,7 @@ alltime2 %>%
                      final_code,program_time),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time) %>% as.factor(),
-         # Month = month(program_start_time) %>% as.factor(),
+         #Month = month(program_start_time) %>% as.factor(),
          Hour = hour(program_start_time) %>% as.factor(), 
          ban_code1 = ban_code1 %>% as.factor(),
          ban_code2 = ban_code2 %>% as.factor(),
