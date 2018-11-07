@@ -83,7 +83,9 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
 ```
 
-# Preprocess
+# XGBoost
+
+## Preprocess
 
 ```{r}
 # 特徴量作成, 特徴量と視聴率3つを残す
@@ -114,8 +116,6 @@ alltime2 %>%
 train_data <- tmp[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
 test_data <- tmp[80001:99598,]
 ```
-
-# XGBoost
 
 ## parameter
 
@@ -212,36 +212,67 @@ data.frame(test_data,pred = pred_test) %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
 ```
 
-# lm
+# lm, glm
 
-- normal all
+## Preprocess
+
+```{r}
+# 特徴量作成, 特徴量と視聴率3つを残す
+# 平均視聴率と比較するために, 1ヶ月分減らした, alltime2を使用する
+alltime2 %>% 
+  left_join(program %>% 
+              select(station_code,program_start_time,ban_code1,
+                     ban_code2,ban_code3,sin_toku,br_format,
+                     final_code,program_time),
+            by = c("station_code","program_start_time")) %>% 
+  mutate(Wday = wday(program_start_time) %>% as.factor(),
+         # Month = month(program_start_time) %>% as.factor(),
+         Hour = hour(program_start_time) %>% as.factor(), 
+         ban_code1 = ban_code1 %>% as.factor(),
+         ban_code2 = ban_code2 %>% as.factor(),
+         ban_code3 = ban_code3 %>% as.factor(),
+         station_code = station_code %>% as.factor(),
+         br_format = br_format %>% as.factor(),
+         final_code = final_code %>% as.factor(),
+         sin_toku = sin_toku %>% as.factor()) %>% 
+  # select(-c(real_watch,shift_watch,all_watch)) -> tmp # alltime用
+  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
+  arrange(program_start_time) -> tmp
+```
+
+```{r}
+train_data <- tmp[1:80000,] %>% 
+  filter(all_watch_rate %>% is.na() %>% !.)
+test_data <- tmp[80001:99598,]
+```
+
+## model
+
+### normal 
 
 ```{r}
 model <- lm(all_watch_rate ~ factor(ban_code1) + factor(ban_code2) + factor(ban_code3) + factor(sin_toku) +
-            factor(br_format) + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
+              factor(br_format) + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
             data = train_data)
 pred <- predict(model,test_data)
 plot(test_data$all_watch_rate,pred)
 ```
 
-- normal few
+### log normal
 
 ```{r}
-model <- lm(all_watch_rate ~ factor(ban_code1) + factor(ban_code2) + factor(sin_toku) + factor(br_format) 
-            + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
+model <- lm(log1p(all_watch_rate) ~ factor(ban_code1) + factor(ban_code2) + factor(ban_code3) + factor(sin_toku) +
+              factor(br_format) + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
             data = train_data)
 pred <- predict(model,test_data)
 plot(test_data$all_watch_rate,pred)
 ```
-- log normal
 
 ```{r}
 model <- glm(all_watch_rate ~ . -program_start_time -all_watch_rate - mean_rate, family = "Gamma"(link = "log"),data = train_data)
 pred <- predict(model1,test_data)
 plot(test_data$all_watch_rate,pred)
 ```
-
-
 
 ## glm
 
