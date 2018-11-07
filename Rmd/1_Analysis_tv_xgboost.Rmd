@@ -79,6 +79,7 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 ```{r}
 alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
 alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
 ```
 
 # Preprocess
@@ -88,9 +89,9 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 # 平均視聴率と比較するために, 1ヶ月分減らした, alltime2を使用する
 alltime2 %>% 
   left_join(program %>% 
-              select(station_code,program_start_time,ban_code1,ban_code2,ban_code3,
-                     sin_toku,br_format,final_code,program_time) %>% 
-              dplyr::collect(),
+              select(station_code,program_start_time,ban_code1,
+                     ban_code2,ban_code3,sin_toku,br_format,
+                     final_code,program_time),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time),
          Month = month(program_start_time),
@@ -197,4 +198,4 @@ pred <- predict(model1,test_data)
 plot(test_data$all_watch_rate,pred)
 ```
 
-
+## 階層ベイズモデル
