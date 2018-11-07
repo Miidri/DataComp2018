@@ -64,6 +64,7 @@ theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 
 ```{r}
 source('~/Desktop/DataComp2018/script/function.R')
+source('~/Desktop/DataComp2018/script/makedummy.R')
 ```
 
 ## Database connecting 
@@ -93,13 +94,20 @@ alltime2 %>%
                      ban_code2,ban_code3,sin_toku,br_format,
                      final_code,program_time),
             by = c("station_code","program_start_time")) %>% 
-  mutate(Wday = wday(program_start_time),
-         Month = month(program_start_time),
-         Hour = hour(program_start_time),
-         ban_code3 = ban_code3 %>% as.factor() %>% as.numeric(),
-         sin_toku = sin_toku %>% as.factor() %>% as.numeric()) %>% 
+  mutate(Wday = wday(program_start_time) %>% as.factor(),
+         # Month = month(program_start_time) %>% as.factor(),
+         Hour = hour(program_start_time) %>% as.factor(), 
+         ban_code1 = ban_code1 %>% as.factor(),
+         ban_code2 = ban_code2 %>% as.factor(),
+         ban_code3 = ban_code3 %>% as.factor(),
+         station_code = station_code %>% as.factor(),
+         br_format = br_format %>% as.factor(),
+         final_code = final_code %>% as.factor(),
+         sin_toku = sin_toku %>% as.factor()) %>% 
   # select(-c(real_watch,shift_watch,all_watch)) -> tmp # alltime用
-  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) -> tmp
+  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
+  arrange(program_start_time) %>% 
+  makedummies(basal_level = TRUE) -> tmp
 ```
 
 ```{r}
@@ -113,7 +121,8 @@ test_data <- tmp[80001:99598,]
 
 ```{r}
 # xgboost fitting with arbitrary parameters
-xgb_params <- list(objective = "reg:logistic",
+xgb_params <- list(objective = "reg:linear",
+                   # objective = "count:poisson",
                    booster = "gbtree",
                    eval_metric = "rmse",
                    nthread = 8,
@@ -124,8 +133,7 @@ xgb_params <- list(objective = "reg:logistic",
                    subsample = 0.85,
                    colsample_bytree = 0.65,
                    alpha = 0,
-                   lambda = 0,
-                   nrounds = 2000)
+                   lambda = 0)
 ```
 
 ## model
@@ -164,6 +172,7 @@ XgboostPred <- function(xgb_params,train_data,test_data){
             print_every_n = 10,
             early_stopping_rounds = 200 )
   # predict
+  pred_train <- predict(xgb_model,train)
   pred_test <- predict(xgb_model,test)
 }
 ```
@@ -171,6 +180,19 @@ XgboostPred <- function(xgb_params,train_data,test_data){
 ## 可視化
 
 ```{r}
+## predict xgboost train data
+formula <- y ~ x
+data.frame(train_data,pred = pred_train) %>% 
+  ggplot(aes(x=all_watch_rate,y=pred)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = formula) +
+  stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```
+
+
+```{r}
+## predict xgboost
 formula <- y ~ x
 data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=pred)) + 
@@ -192,10 +214,48 @@ data.frame(test_data,pred = pred_test) %>%
 
 # lm
 
+- normal all
+
 ```{r}
-model1 <- lm(all_watch_rate ~ . -program_start_time -all_watch_rate - mean_rate, data = train_data)
+model <- lm(all_watch_rate ~ factor(ban_code1) + factor(ban_code2) + factor(ban_code3) + factor(sin_toku) +
+            factor(br_format) + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
+            data = train_data)
+pred <- predict(model,test_data)
+plot(test_data$all_watch_rate,pred)
+```
+
+- normal few
+
+```{r}
+model <- lm(all_watch_rate ~ factor(ban_code1) + factor(ban_code2) + factor(sin_toku) + factor(br_format) 
+            + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
+            data = train_data)
+pred <- predict(model,test_data)
+plot(test_data$all_watch_rate,pred)
+```
+- log normal
+
+```{r}
+model <- glm(all_watch_rate ~ . -program_start_time -all_watch_rate - mean_rate, family = "Gamma"(link = "log"),data = train_data)
 pred <- predict(model1,test_data)
 plot(test_data$all_watch_rate,pred)
 ```
+
+
+
+## glm
+
+- poisson regrssion
+
+```{r}
+model <- glm(all_watch_rate ~ factor(ban_code1) + factor(ban_code2) + factor(ban_code3) + factor(sin_toku) +
+            factor(br_format) + factor(final_code) + program_time + factor(Wday) + factor(Hour), 
+            family = "poisson",
+            data = train_data)
+
+pred <- predict(model1,test_data)
+plot(test_data$all_watch_rate,pred)
+```
+
 
 ## 階層ベイズモデル
