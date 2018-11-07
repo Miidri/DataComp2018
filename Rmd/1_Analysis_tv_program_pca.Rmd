@@ -1,0 +1,160 @@
+---
+title: "pca"
+output: html_document
+---
+
+# Setting{.tabset .tabset-fade .tabset-pills}
+
+- option, package, database setting
+
+## knitr option
+
+```{r reset, include=FALSE}
+# 初期化
+rm(list = ls())
+```
+
+```{r set up, message=FALSE}
+# set directory
+setwd("~/Desktop/Datacomp2018/") 
+# max.print 
+options(max.print="20", digits=5)
+# Global options
+library(knitr)
+opts_chunk$set(echo=TRUE,
+               cache = FALSE,
+	             prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE,
+               fig.width = 11)
+opts_knit$set(width=75)
+```
+
+## packages
+
+```{r package, message=FALSE}
+library(tidyverse)
+library(summarytools) # summary easily for EDA
+library(skimr) 
+library(RPostgreSQL)
+library(dbplyr)
+library(lubridate)
+library(ggthemes)
+library(ggpmisc)
+library(ggforce)
+library(scales)
+library(doParallel)
+library(foreach)
+library(DT)
+library(gridExtra)
+library(xgboost)
+library(ggpmisc)
+library(Gifi)
+# set ggplot theme
+theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
+```
+
+## functions
+
+```{r}
+source('~/Desktop/DataComp2018/script/function.R')
+source('~/Desktop/DataComp2018/script/makedummy.R')
+```
+
+## Database connecting 
+
+- 接続情報は, script内で処理する
+
+```{r}
+source('~/Desktop/DataComp2018/script/sql_connect.R')
+```
+
+## load data
+
+```{r}
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
+```
+
+# Preprocess
+
+```{r}
+alltime2 %>% 
+  left_join(program %>% 
+              select(station_code,program_start_time,ban_code1,
+                     ban_code2,ban_code3,sin_toku,br_format,
+                     final_code,program_time,program_name),
+            by = c("station_code","program_start_time")) %>% 
+  mutate(Wday = wday(program_start_time) %>% as.factor(),
+         # Month = month(program_start_time) %>% as.factor(),
+         Hour = hour(program_start_time) %>% as.factor(), 
+         ban_code1 = ban_code1 %>% as.factor(),
+         ban_code2 = ban_code2 %>% as.factor(),
+         ban_code3 = ban_code3 %>% as.factor(),
+         station_code = station_code %>% as.factor(),
+         br_format = br_format %>% as.factor(),
+         final_code = final_code %>% as.factor(),
+         sin_toku = sin_toku %>% as.factor(),
+         program_time = program_time %>% as.factor()) %>% 
+  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
+  arrange(program_start_time) -> tmp
+```
+
+# カテゴリー主成分分析 (CAT PCA)
+ 
+- [IBM](https://www.ibm.com/support/knowledgecenter/ja/SSLVMB_23.0.0/spss/categories/idh_cpca.html)
+
+## tutorial
+
+```{r}
+test <- tmp %>% 
+  select(-c(program_start_time,program_name,program_time,all_watch_rate,mean_rate,ban_code3)) %>% 
+  as.data.frame() %>% 
+  princals()
+```
+
+```{r}
+summary(test)
+
+plot(test, plot.type = "transplot")
+plot(test, "loadplot", main = "Loadings Plot ABC Data")  ## aspect ratio = 1
+plot(test, "biplot", labels.scores = TRUE, main = "Biplot ABC Data")
+plot(test, "screeplot")
+
+## linear restrictions (mimics standard PCA)
+abc_knots <- knotsGifi(ABC6, "E")     ## 0 interior knots
+fitlin <- princals(ABC6, knots = abc_knots, degrees = 1)  
+fitlin 
+fitlin$evals
+plot(fitlin, plot.type = "transplot")
+
+## compare with standard PCA
+ABCnum <- makeNumeric(ABC6)
+fitpca <- prcomp(ABCnum, scale = TRUE)
+fitpca$sdev^2   
+
+## more complicated specifications
+## Not run: 
+data(epi.bfi, package = "psych")
+epi6 <- epi.bfi[,1:6]
+fitepi1 <- princals(epi6, knots = knotsGifi(epi6, "Q"))    ## monotone splines (degree 2)
+fitepi1
+plot(fitepi1, "transplot")
+
+## no interior knots vars 1 and 2; data knots vars 3 and 4; 5 
+## interior percentile knots var 5; no interior knots var 6)
+knotList <- c(knotsGifi(epi6[,1:2], "E"), 
+              knotsGifi(epi6[,3:4], "D"), 
+              knotsGifi(epi6[,5], "Q", n = 5),
+              knotsGifi(epi6[,6], "E"))
+knotList  
+ordvec <- c(TRUE, FALSE, TRUE, FALSE, FALSE, TRUE) ## ordinal restrictions
+degvec <- c(3, -1, 2, 2, 3, 1)                     ## spline degrees (second variable nominal)
+fitepi2 <- princals(epi6, knots = knotList, ordinal = ordvec, degrees = degvec)
+fitepi2
+plot(fitepi2, "transplot")
+```
+
