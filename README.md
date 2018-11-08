@@ -34,7 +34,7 @@ For the working process
 ├── DataComp2018.Rproj
 ├── README.md
 ├── Rmd
-│   ├── 0_EDA_Sample_user.Rmd
+│   ├── 0_EDA_Sample_user.Rmd
 │   ├── 0_EDA_check_house_number.Rmd
 │   ├── 0_EDA_check_house_number.html
 │   ├── 0_EDA_t_weblog.Rmd
@@ -44,7 +44,9 @@ For the working process
 │   ├── 0_EDA_tv.Rmd
 │   ├── 0_EDA_tv.html
 │   ├── 0_for_slide.Rmd
-│   └── 1_Analysis_tv.Rmd
+│   ├── 1_Analysis_tv_mean_model.Rmd
+│   ├── 1_Analysis_tv_program_pca.Rmd
+│   └── 1_Analysis_tv_some_models.Rmd
 │─ data
 │   ├── watch_rate.csv
 │   ├── watch_rate_pre.csv
