@@ -56,6 +56,7 @@ library(DT)
 library(gridExtra)
 library(xgboost)
 library(ggpmisc)
+library(Metrics)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
@@ -83,6 +84,30 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
 ```
 
+## load cluster
+
+```{r}
+LogCluster <- readRDS("~/Desktop/DataComp2018/data/tmp.rds")
+pro_mst <- program %>%
+  count(program_code, program_name) %>%
+  # collect() %>%
+  arrange(program_code, desc(n)) %>%
+  group_by(program_code) %>%
+  #top_n(n = 1, wt = n) %>% 
+  dplyr::slice(1) %>% # 各グループの1つのみ残す
+  ungroup()
+
+LogCluster1 <- LogCluster %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "program_code") %>%
+  as_tibble() %>%
+  gather(topic, value, -program_code) %>%
+  left_join(pro_mst, by = "program_code") %>%
+  group_by(program_code) %>%
+  top_n(1,value) %>% 
+  ungroup()
+```
+
 # XGBoost
 
 ## Preprocess
@@ -94,7 +119,7 @@ alltime2 %>%
   left_join(program %>% 
               select(station_code,program_start_time,ban_code1,
                      ban_code2,ban_code3,sin_toku,br_format,
-                     final_code,program_time),
+                     final_code,program_time,program_code,program_name),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time) %>% as.factor(),
          #Month = month(program_start_time) %>% as.factor(),
@@ -109,12 +134,15 @@ alltime2 %>%
   # select(-c(real_watch,shift_watch,all_watch)) -> tmp # alltime用
   select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
   arrange(program_start_time) %>% 
-  makedummies(basal_level = TRUE) -> tmp
+  left_join(LogCluster1 %>% 
+              select(program_code,topic) %>% 
+              mutate(topic = factor(topic)),
+            by="program_code") -> tmp
 ```
 
 ```{r}
 train_data <- tmp[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
-test_data <- tmp[80001:99598,]
+test_data <- tmp[80001:99598,] %>% filter(all_watch_rate %>% is.na() %>% !.)
 ```
 
 ## parameter
@@ -147,7 +175,7 @@ XgboostPred <- function(xgb_params,train_data,test_data){
   test <- test_data %>% 
     select(-c(program_start_time,all_watch_rate,mean_rate)) %>% 
     data.matrix()
-  target <- train_data$all_watch_rate
+  target <- train_data$all_watch_rate %>% log1p()
   # set seed
   set.seed(831)
   # xgboost cross validation to choice best parameter
@@ -156,7 +184,7 @@ XgboostPred <- function(xgb_params,train_data,test_data){
            params = xgb_params,
            missing = NA,
            nfold = 4,
-           nrounds = 2000,
+           nrounds = 3000,
            verbose = TRUE,
            prediction = TRUE,                                           # return the prediction using the final model 
            showsd = TRUE,                                               # standard deviation of loss across folds
@@ -174,6 +202,8 @@ XgboostPred <- function(xgb_params,train_data,test_data){
   # predict
   pred_train <- predict(xgb_model,train)
   pred_test <- predict(xgb_model,test)
+  # predict rmsle
+  pred_test <- expm1(predict(xgb_model,test))
 }
 ```
 
@@ -192,7 +222,9 @@ data.frame(train_data,pred = pred_train) %>%
 
 
 ```{r}
-## predict xgboost
+# rmse
+rmse(test_data$all_watch_rate,pred_test)
+## predict xgboost test data
 formula <- y ~ x
 data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=pred)) + 
@@ -203,6 +235,9 @@ data.frame(test_data,pred = pred_test) %>%
 ```
 
 ```{r}
+# rmse
+rmse(test_data$all_watch_rate,test_data$mean_rate)
+# 従来手法
 formula <- y ~ x
 data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 

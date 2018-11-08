@@ -52,6 +52,7 @@ library(gridExtra)
 library(xgboost)
 library(ggpmisc)
 library(Gifi)
+library(cluster)
 # set ggplot theme
 theme_set(theme_classic(base_size = 18,base_family = "Helvetica"))
 ```
@@ -79,14 +80,42 @@ alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
 program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
 ```
 
-# Preprocess
+# 視聴ログによるクラスタリング結果
 
 ```{r}
-alltime2 %>% 
+LogCluster <- readRDS("~/Desktop/DataComp2018/data/tmp.rds")
+pro_mst <- program %>%
+  as_tibble() %>%
+  count(program_code, program_name) %>%
+  # collect() %>%
+  arrange(program_code, desc(n)) %>%
+  group_by(program_code) %>%
+  #top_n(n = 1, wt = n) %>% 
+  dplyr::slice(1) %>% # 各グループの1つのみ残す
+  ungroup()
+
+LogCluster1 <- LogCluster %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "program_code") %>%
+  as_tibble() %>%
+  gather(topic, value, -program_code) %>%
+  left_join(pro_mst, by = "program_code") %>%
+  group_by(program_code) %>%
+  top_n(1,value) %>% 
+  ungroup()
+```
+
+# 番組情報に基づくクラスタリング結果
+
+## Preprocess
+
+```{r}
+alltime %>% 
+  # filter(!is.na(all_watch_rate)) %>% 
   left_join(program %>% 
               select(station_code,program_start_time,ban_code1,
                      ban_code2,ban_code3,sin_toku,br_format,
-                     final_code,program_time,program_name),
+                     final_code,program_name,program_code),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time) %>% as.factor(),
          # Month = month(program_start_time) %>% as.factor(),
@@ -99,62 +128,125 @@ alltime2 %>%
          final_code = final_code %>% as.factor(),
          sin_toku = sin_toku %>% as.factor(),
          program_time = program_time %>% as.factor()) %>% 
-  select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
-  arrange(program_start_time) -> tmp
+  select(-c(real_watch,shift_watch,diff_watch,all_watch,sample_num,real_watch_rate,shift_watch_rate)) %>% 
+  # select(-c(pre1,pre2,pre3,pre4, rate1,rate2,rate3,rate4)) %>% 
+  # group_by(program_name) %>% 
+  # summarise(num = row_number())
+  distinct(program_code, .keep_all=TRUE) -> tmp
 ```
 
-# カテゴリー主成分分析 (CAT PCA)
+## カテゴリー主成分分析 (CAT PCA)
  
 - [IBM](https://www.ibm.com/support/knowledgecenter/ja/SSLVMB_23.0.0/spss/categories/idh_cpca.html)
 
-## tutorial
+### principal
 
 ```{r}
 test <- tmp %>% 
-  select(-c(program_start_time,program_name,program_time,all_watch_rate,mean_rate,ban_code3)) %>% 
+  # select(-c(program_start_time,program_name,program_time,all_watch_rate,mean_rate)) %>% 
+  select(-c(program_start_time,program_name,program_code,program_time,all_watch_rate)) %>% 
   as.data.frame() %>% 
-  princals()
+  princals(ndim=4)
 ```
+
+### check summary
 
 ```{r}
 summary(test)
-
-plot(test, plot.type = "transplot")
-plot(test, "loadplot", main = "Loadings Plot ABC Data")  ## aspect ratio = 1
-plot(test, "biplot", labels.scores = TRUE, main = "Biplot ABC Data")
-plot(test, "screeplot")
-
-## linear restrictions (mimics standard PCA)
-abc_knots <- knotsGifi(ABC6, "E")     ## 0 interior knots
-fitlin <- princals(ABC6, knots = abc_knots, degrees = 1)  
-fitlin 
-fitlin$evals
-plot(fitlin, plot.type = "transplot")
-
-## compare with standard PCA
-ABCnum <- makeNumeric(ABC6)
-fitpca <- prcomp(ABCnum, scale = TRUE)
-fitpca$sdev^2   
-
-## more complicated specifications
-## Not run: 
-data(epi.bfi, package = "psych")
-epi6 <- epi.bfi[,1:6]
-fitepi1 <- princals(epi6, knots = knotsGifi(epi6, "Q"))    ## monotone splines (degree 2)
-fitepi1
-plot(fitepi1, "transplot")
-
-## no interior knots vars 1 and 2; data knots vars 3 and 4; 5 
-## interior percentile knots var 5; no interior knots var 6)
-knotList <- c(knotsGifi(epi6[,1:2], "E"), 
-              knotsGifi(epi6[,3:4], "D"), 
-              knotsGifi(epi6[,5], "Q", n = 5),
-              knotsGifi(epi6[,6], "E"))
-knotList  
-ordvec <- c(TRUE, FALSE, TRUE, FALSE, FALSE, TRUE) ## ordinal restrictions
-degvec <- c(3, -1, 2, 2, 3, 1)                     ## spline degrees (second variable nominal)
-fitepi2 <- princals(epi6, knots = knotList, ordinal = ordvec, degrees = degvec)
-fitepi2
-plot(fitepi2, "transplot")
+# 主成分得点
+test$objectscores
+# 主成分負荷量
+test$loadings
+# 相関行列
+test$rhat
 ```
 
+- 綺麗に分割されている.
+
+```{r}
+library(rgl)
+plot3d(test$objectscores)
+```
+
+- 主成分分析の結果, 番組放送時間を使って, クラスタリング
+
+```{r}
+clus <- data.frame(test$objectscores,tmp %>% select(program_time)) %>% 
+  kmeans(centers = 6)
+clus$cluster %>% table
+clusplot(test$objectscores %>% data.frame(), clus$cluster,color = TRUE,shade = TRUE)
+```
+
+- クラスターごとの視聴率
+
+```{r}
+data.frame(tmp,clus = clus$cluster) %>% 
+  ggplot(aes(x=all_watch_rate)) +
+  geom_histogram(bins = 100) +
+  facet_wrap(~factor(clus))
+```
+
+- クラスターごとの番組
+
+```{r}
+InfoCluster <- data.frame(tmp,clus = clus$cluster) 
+InfoCluster %>% 
+  as_tibble() %>% 
+  select(program_name,all_watch_rate,clus) %>% 
+  group_by(clus) %>% 
+  mutate(rank = row_number(desc(all_watch_rate))) %>% 
+  filter(rank < 1001) %>% 
+  select(clus,program_name,rank) %>% 
+  spread(clus,program_name) %>% 
+  View
+```
+
+# 2つのクラスタリング結果の比較
+
+- test
+
+```{r}
+InfoCluster %>% 
+  select(program_name,program_code,clus) %>% 
+  inner_join(LogCluster1, by=c("program_code")) %>% 
+  ggplot(aes(x=factor(topic),y=clus)) +
+  geom_point(position = "jitter") +
+  labs(x="視聴ログに基づくクラスタリング",y="番組情報によるクラスタリング") +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```
+
+- ban_code1
+
+```{r}
+InfoCluster %>% 
+  select(program_name,program_code,clus,ban_code1) %>% 
+  inner_join(LogCluster1, by=c("program_code","program_name")) %>% 
+  ggplot(aes(x=factor(topic),y=ban_code1)) +
+  geom_point(position = "jitter") +
+  labs(x="視聴ログに基づくクラスタリング",y="番組大分類") +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```
+
+- station_code
+
+```{r}
+InfoCluster %>% 
+  select(program_name,program_code,clus,station_code) %>% 
+  inner_join(LogCluster1, by=c("program_code","program_name")) %>% 
+  ggplot(aes(x=factor(topic),y=station_code)) +
+  geom_point(position = "jitter") +
+  labs(x="視聴ログに基づくクラスタリング",y="番組チャンネル") +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```
+
+- program_time
+
+```{r}
+InfoCluster %>% 
+  select(program_name,program_code,clus,program_time) %>% 
+  inner_join(LogCluster1, by=c("program_code","program_name")) %>% 
+  ggplot(aes(x=factor(topic),y=program_time)) +
+  geom_point(position = "jitter") +
+  labs(x="視聴ログに基づくクラスタリング",y="番組放送時間") +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+```

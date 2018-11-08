@@ -929,6 +929,14 @@ p <- grid.arrange(p1,p2,p3, layout_matrix = rbind(c(1, 1),c(2, 3)))
 ggsave(file = "~/Desktop/DataComp2018/image/basic/web基礎集計(時系列とpcアクセスとスマホアクセス).png", plot = p, dpi = 100, width = 19.73, height = 9.3)
 ```
 
-## アンケート
+### アンケート
 
 - データだけで良いかも?
+
+### 出演者情報
+
+```{r}
+
+```
+
+
