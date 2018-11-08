@@ -140,13 +140,21 @@ alltime2 %>%
               mutate(topic = factor(topic)),
             by="program_code") -> tmp
 tmp1 <- tmp %>% 
-  left_join(tmp[1:80000,] %>% group_by(ban_code1) %>% summarise_at(c("all_watch_rate"),fn2),by = "ban_code1") %>% 
-  left_join(tmp[1:80000,] %>% group_by(Hour) %>% summarise_at(c("all_watch_rate"),fn2),by = "Hour")
+  left_join(tmp %>% 
+              filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+              group_by(ban_code1) %>% summarise_at(c("all_watch_rate"),fn2),by = "ban_code1") %>% 
+  left_join(tmp %>% 
+              filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+              group_by(Hour) %>% summarise_at(c("all_watch_rate"),fn2),by = "Hour")
 ```
 
 ```{r}
-train_data <- tmp1[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
-test_data <- tmp1[80001:99598,] %>% filter(all_watch_rate %>% is.na() %>% !.)
+train_data <- tmp1 %>% 
+  filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+  filter(all_watch_rate %>% is.na() %>% !.)
+test_data <- tmp1 %>% 
+  filter(program_start_time >= "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+  filter(all_watch_rate %>% is.na() %>% !.)
 ```
 
 ## parameter
@@ -207,11 +215,17 @@ XgboostPred <- function(xgb_params,train_data,test_data){
   pred_train <- predict(xgb_model,train)
   pred_test <- predict(xgb_model,test)
   # predict rmsle
+  pred_train <- expm1(predict(xgb_model,train))
   pred_test <- expm1(predict(xgb_model,test))
+  xgb.importance(model = xgb_model) %>% 
+    xgb.plot.importance(top_n = 30) %>% print()
+
 }
 ```
 
 ## 可視化
+
+- 訓練データに対して,
 
 ```{r}
 ## predict xgboost train data
@@ -224,31 +238,46 @@ data.frame(train_data,pred = pred_train) %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
 ```
 
+- テストデータに対して
 
 ```{r}
 # rmse
 rmse(test_data$all_watch_rate,pred_test)
 ## predict xgboost test data
 formula <- y ~ x
-data.frame(test_data,pred = pred_test) %>% 
+p1 <- data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=pred)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="xgboostによる予測視聴率", x="実際の視聴率", 
+       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466, RMSE = 0.0055") 
 ```
+
+```{r}
+ggsave(file = "~/Desktop/DataComp2018/image/analysis/xgboostを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
+- 従来手法
 
 ```{r}
 # rmse
 rmse(test_data$all_watch_rate,test_data$mean_rate)
 # 従来手法
 formula <- y ~ x
-data.frame(test_data,pred = pred_test) %>% 
+p1 <- data.frame(test_data,pred = pred_test) %>% 
   ggplot(aes(x=all_watch_rate,y=mean_rate)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = formula) +
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(y ="従来手法による推定視聴率", x="実際の視聴率", 
+       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466,  RMSE = 0.0068") 
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/過去4週間分のデータを用いた予測視聴率と総合視聴率の関係性.png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
 # lm, glm
