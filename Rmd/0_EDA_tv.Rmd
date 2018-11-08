@@ -370,6 +370,25 @@ p1
 ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合視聴率(ViolinPlot).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
 ```
 
+## 箱ひげ図
+
+```{r}
+p1 <-
+  alltime %>% 
+  left_join(sta,by="station_code") %>% 
+  ggplot(aes(factor(station_jp), all_watch_rate, colour = factor(station_jp))) +
+  geom_boxplot() + 
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  guides(colour = FALSE) +
+  labs(y = "総合視聴率", x="チャンネル")
+p1
+```
+
+```{r eval=FALSE}
+ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合視聴率(箱ひげ図).png", plot = p1, dpi = 100, width = 19.73, height = 9.3)
+```
+
 ## カラムの関係性
 
 - リアルタイム / タイムシフト
@@ -459,9 +478,8 @@ p1 <- alltime %>%
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
     theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     guides(colour = guide_legend(title = "チャンネル")) +
-    labs(y = "総合視聴率") +
-    theme(axis.text.x = element_text(angle = 30, hjust = 1),
-          axis.title.x = element_blank()) +
+    labs(y = "総合視聴率",x="日付") +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
     facet_zoom(xy = month(program_start_time) == "11", horizontal = FALSE)
 p1
 ```

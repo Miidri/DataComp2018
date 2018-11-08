@@ -83,8 +83,7 @@ p1 <- sample %>%
   ggplot(aes(factor(sex, labels = c("男性","女性")),num)) +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
-    theme(axis.title.x = element_blank()) +
-    labs(y="標本数")
+    labs(x = "性別",y="標本数")
 ```
 
 - 結婚の有無
@@ -99,8 +98,8 @@ p2 <- sample %>%
   ggplot(aes(factor(marriage, labels = c("未婚","既婚")),num)) +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
-    theme(axis.title.x = element_blank()) +
-    labs(y="標本数")
+    theme(axis.title.y = element_blank()) +
+    labs(x="結婚の有無")
 ```
 
 - 年齢
@@ -138,8 +137,8 @@ p4 <- ggplot(tmp,
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
     theme(axis.text.x = element_text(angle = 30,hjust = 1),
-          axis.title.x = element_blank()) +
-    labs(y="標本数")
+          axis.title.y = element_blank()) +
+    labs(x = "職業")
 ```
 
 ```{r}
