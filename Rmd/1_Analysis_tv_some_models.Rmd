@@ -113,6 +113,7 @@ LogCluster1 <- LogCluster %>%
 ## Preprocess
 
 ```{r}
+fn2 <- funs(mean, min, max, sd, .args = list(na.rm = TRUE))
 # 特徴量作成, 特徴量と視聴率3つを残す
 # 平均視聴率と比較するために, 1ヶ月分減らした, alltime2を使用する
 alltime2 %>% 
@@ -138,11 +139,14 @@ alltime2 %>%
               select(program_code,topic) %>% 
               mutate(topic = factor(topic)),
             by="program_code") -> tmp
+tmp1 <- tmp %>% 
+  left_join(tmp[1:80000,] %>% group_by(ban_code1) %>% summarise_at(c("all_watch_rate"),fn2),by = "ban_code1") %>% 
+  left_join(tmp[1:80000,] %>% group_by(Hour) %>% summarise_at(c("all_watch_rate"),fn2),by = "Hour")
 ```
 
 ```{r}
-train_data <- tmp[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
-test_data <- tmp[80001:99598,] %>% filter(all_watch_rate %>% is.na() %>% !.)
+train_data <- tmp1[1:80000,] %>% filter(all_watch_rate %>% is.na() %>% !.)
+test_data <- tmp1[80001:99598,] %>% filter(all_watch_rate %>% is.na() %>% !.)
 ```
 
 ## parameter
@@ -170,10 +174,10 @@ xgb_params <- list(objective = "reg:linear",
 XgboostPred <- function(xgb_params,train_data,test_data){
   # set data
   train <- train_data %>% 
-    select(-c(program_start_time,all_watch_rate,mean_rate)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name)) %>% 
     data.matrix()
   test <- test_data %>% 
-    select(-c(program_start_time,all_watch_rate,mean_rate)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name)) %>% 
     data.matrix()
   target <- train_data$all_watch_rate %>% log1p()
   # set seed
