@@ -935,7 +935,39 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/web基礎集計(時系列とpc
 ### 出演者情報
 
 ```{r}
+# csv
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
+```
 
+```{r}
+tmp <- alltime %>% 
+  select(station_code, program_start_time, program_time, 
+         real_watch_rate, shift_watch_rate,all_watch_rate) %>% 
+  left_join(sta %>% 
+              select(station_code,station_jp) %>% 
+              dplyr::collect(),
+            by="station_code") %>% 
+  left_join(performer %>% 
+              select(station_code,program_start_time,regular, guest) %>% 
+              dplyr::collect(),
+            by =c("program_start_time","station_code"))
+# レギュラー, ゲスト空白を削除
+regular <- tmp %>% 
+  select(-guest) %>% 
+  filter(regular != "") %>% 
+  mutate(regular = strsplit(regular,",")) %>% 
+  unnest(regular) %>% 
+  mutate(regular = gsub("[[:blank:]]","",regular))
+guest <- tmp %>% 
+  select(-regular) %>% 
+  filter(guest != "") %>% 
+  mutate(guest = strsplit(as.character(guest), ","))
+
+# 獲得平均視聴率ベスト10
+regular %>% 
+  group_by(regular) %>% 
+  summarise(num = n(),
+            rate = mean(all_watch_rate,na.rm = TRUE))
 ```
 
 
