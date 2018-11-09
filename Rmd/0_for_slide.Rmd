@@ -119,11 +119,15 @@ p3 <- ggplot(tmp,aes(age)) +
 ### 職業
 
 ```{r}
+job1 <- job %>% arrange(job_code) %>% dplyr::collect()
 tmp <- sample %>% 
   dplyr::collect() %>% 
   left_join(
-    data.frame(job,job2 = c("大学生","高校生","各種学校生/予備校生","中学生","小学生","経営/管理職","専門職/自由業","乳幼児/未就学児",
-                            "農業/漁業/林業","商工自営業","パートタイマー", "その他","専業主婦","無職","給料技能/作業職","給料事務/技術職")),
+    data.frame(job1,job2 = 
+                 c("給料事務/技術職","給料技能/作業職","経営/管理職","農業/漁業/林業",
+                   "専門職/自由業","商工自営業","乳幼児/未就学児","小学生","中学生",
+                   "高校生","大学生","各種学校生/予備校生","専業主婦",
+                   "パートタイマー","無職","その他")),
     by="job_code") %>% 
   group_by(job2) %>% 
   summarise(num = n()) %>% 
@@ -131,10 +135,13 @@ tmp <- sample %>%
 
 p4 <- ggplot(tmp,
        aes(factor(job2, 
-                  levels = c("大学生","高校生","各種学校生/予備校生","中学生","小学生","乳幼児/未就学児","専業主婦","パートタイマー",
-                             "経営/管理職","給料技能/作業職","給料事務/技術職","専門職/自由業","農業/漁業/林業","商工自営業","無職","その他")),
+                  levels = 
+                    c("大学生","高校生","各種学校生/予備校生","中学生","小学生",
+                      "乳幼児/未就学児","専業主婦","パートタイマー","経営/管理職",
+                      "給料技能/作業職","給料事務/技術職","専門職/自由業","農業/漁業/林業",
+                      "商工自営業","無職","その他")),
            num)) +
-  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
     geom_bar(stat = "identity",fill = "steelblue") +
     theme(axis.text.x = element_text(angle = 30,hjust = 1),
           axis.title.y = element_blank()) +
