@@ -953,21 +953,49 @@ tmp <- alltime %>%
             by =c("program_start_time","station_code"))
 # レギュラー, ゲスト空白を削除
 regular <- tmp %>% 
+  mutate(regular = str_replace_all(regular, fixed(" "), "")) %>% 
   select(-guest) %>% 
   filter(regular != "") %>% 
   mutate(regular = strsplit(regular,",")) %>% 
   unnest(regular) %>% 
-  mutate(regular = gsub("[[:blank:]]","",regular))
+  mutate(regular = str_trim(regular, side="both"))
+
 guest <- tmp %>% 
+  mutate(guest = str_replace_all(guest, fixed(" "), "")) %>% 
   select(-regular) %>% 
   filter(guest != "") %>% 
-  mutate(guest = strsplit(as.character(guest), ","))
-
-# 獲得平均視聴率ベスト10
-regular %>% 
+  mutate(guest = strsplit(guest,",")) %>% 
+  unnest(guest) %>% 
+  mutate(guest = str_trim(guest, side="both"))
+  
+# 平均視聴率と番組出演回数の関係性
+p1 <- regular %>% 
   group_by(regular) %>% 
   summarise(num = n(),
-            rate = mean(all_watch_rate,na.rm = TRUE))
+         rate = mean(all_watch_rate,na.rm = TRUE)) %>%
+  ungroup() %>% 
+  ggplot(aes(x=num,y=rate)) +
+  geom_point() +
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  labs(x="レギュラー番組出演回数",y="出演者の平均獲得視聴率")
+
+# 獲得平均視聴率ベスト10
+p2 <- regular %>% 
+  group_by(regular) %>% 
+  summarise(num = n(),
+         rate = mean(all_watch_rate,na.rm = TRUE)) %>%
+  ungroup() %>% 
+  filter(num > 10) %>% #出演10回以上
+  top_n(20,rate) %>% 
+  ggplot(aes(x=reorder(factor(regular),-rate),y=rate))+
+    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+    geom_bar(stat = "identity",fill = "steelblue") +
+    theme(axis.text.x = element_text(angle = 30,hjust = 1)) +
+  labs(x="レギュラー番組出演者",y="出演者の平均獲得視聴率")
 ```
 
+```{r}
+p <- grid.arrange(p1,p2,nrow=2)
+ggsave(file = "~/Desktop/DataComp2018/image/basic/出演者情報.png", plot = p, dpi = 100, width = 10, height = 9.3)
+```
 

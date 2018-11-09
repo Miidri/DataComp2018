@@ -182,10 +182,10 @@ xgb_params <- list(objective = "reg:linear",
 XgboostPred <- function(xgb_params,train_data,test_data){
   # set data
   train <- train_data %>% 
-    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name,topic)) %>% 
     data.matrix()
   test <- test_data %>% 
-    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name)) %>% 
+    select(-c(program_start_time,all_watch_rate,mean_rate,program_code,program_name,topic)) %>% 
     data.matrix()
   target <- train_data$all_watch_rate %>% log1p()
   # set seed
@@ -222,8 +222,8 @@ XgboostPred <- function(xgb_params,train_data,test_data){
 
 ```{r}
 p1 <- xgb.importance(model = xgb_model) %>% 
-  data.frame(.,Feature2 = c("放送時刻(時間)", "番組クラスタ","チャンネル","放送時間","大分類平均視聴率","放送曜日","放送形式",
-                            "大分類","中分類","小分類","新番特番フラグ", "最終回コード")) %>% 
+  data.frame(.,Feature2 = c("放送時刻(時間)", "チャンネル","放送時間","大分類平均視聴率","放送曜日",
+                            "大分類","放送形式","小分類","中分類", "最終回コード","新番特番フラグ")) %>% 
   ggplot(aes(x=reorder(factor(Feature2),Gain),y=Gain)) +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   geom_bar(stat = "identity",fill = "steelblue") +
@@ -260,7 +260,7 @@ p2 <- data.frame(test_data,pred = pred_test) %>%
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="xgboostによる予測視聴率", x="実際の視聴率", 
-       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466, RMSLE = 0.0053") 
+       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466, RMSLE = 0.0054") 
 ```
 
 ```{r}
