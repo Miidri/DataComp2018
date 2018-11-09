@@ -282,7 +282,7 @@ p1 <- data.frame(test_data,pred = pred_test) %>%
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="従来手法による推定視聴率", x="実際の視聴率", 
-       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466,  RMSE = 0.0065") 
+       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466,  RMSLE = 0.0065") 
 ```
 
 ```{r eval=FALSE}
