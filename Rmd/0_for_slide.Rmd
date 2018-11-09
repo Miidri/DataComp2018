@@ -946,8 +946,10 @@ tmp <- alltime %>%
          real_watch_rate, shift_watch_rate,all_watch_rate) %>% 
   inner_join(performer %>% 
               select(station_code,program_start_time,regular, guest) %>% 
-              dplyr::collect(),
-            by =c("program_start_time","station_code"))
+              dplyr::collect() %>% 
+              mutate(program_start_time = 
+                       as_datetime(program_start_time, tz="Asia/Tokyo")),
+            by = c("program_start_time","station_code"))
 # レギュラー, ゲスト空白を削除
 regular <- tmp %>% 
   mutate(regular = str_replace_all(regular, fixed(" "), "")) %>% 
@@ -982,7 +984,7 @@ toplist <- regular %>%
   summarise(num = n(),
          rate = mean(all_watch_rate,na.rm = TRUE)) %>%
   ungroup() %>% 
-  filter(num > 10) %>% #出演10回以上
+  filter(num > 50) %>% #出演50回以上
   top_n(20,rate)
 p2 <- toplist %>% 
   inner_join(regular,by="regular") %>% 
