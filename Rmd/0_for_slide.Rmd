@@ -979,19 +979,22 @@ p1 <- regular %>%
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(x="レギュラー番組出演回数",y="出演者の平均獲得視聴率")
 
-# 獲得平均視聴率ベスト10
-p2 <- regular %>% 
+# 獲得平均視聴率ベスト10の箱ひげ図
+toplist <- regular %>% 
   group_by(regular) %>% 
   summarise(num = n(),
          rate = mean(all_watch_rate,na.rm = TRUE)) %>%
   ungroup() %>% 
   filter(num > 10) %>% #出演10回以上
-  top_n(20,rate) %>% 
-  ggplot(aes(x=reorder(factor(regular),-rate),y=rate))+
-    theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
-    geom_bar(stat = "identity",fill = "steelblue") +
-    theme(axis.text.x = element_text(angle = 30,hjust = 1)) +
-  labs(x="レギュラー番組出演者",y="出演者の平均獲得視聴率")
+  top_n(20,rate)
+p2 <- toplist %>% 
+  inner_join(regular,by="regular") %>% 
+  ggplot(aes(x=factor(regular),y=all_watch_rate))+  
+  geom_boxplot() + 
+  # stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
+  theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
+  theme(axis.text.x = element_text(angle = 30,hjust = 1)) +
+  labs(x="レギュラー番組出演者",y="出演者の獲得視聴率")
 ```
 
 ```{r}
