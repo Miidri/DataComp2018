@@ -79,9 +79,11 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 ## load data
 
 ```{r}
-alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
-alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
-program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
+# load csv
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv") %>% 
+  mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv") %>%
+  mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
 ```
 
 ## load cluster
@@ -90,7 +92,7 @@ program <- read_csv("~/Desktop/DataComp2018/data/program.csv")
 LogCluster <- readRDS("~/Desktop/DataComp2018/data/tmp.rds")
 pro_mst <- program %>%
   count(program_code, program_name) %>%
-  # collect() %>%
+  collect() %>%
   arrange(program_code, desc(n)) %>%
   group_by(program_code) %>%
   #top_n(n = 1, wt = n) %>% 
@@ -120,7 +122,8 @@ alltime2 %>%
   left_join(program %>% 
               select(station_code,program_start_time,ban_code1,
                      ban_code2,ban_code3,sin_toku,br_format,
-                     final_code,program_time,program_code,program_name),
+                     final_code,program_time,program_code,program_name) %>% 
+              dplyr::collect(),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time) %>% as.factor(),
          #Month = month(program_start_time) %>% as.factor(),
