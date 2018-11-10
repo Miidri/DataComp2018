@@ -81,11 +81,6 @@ alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv") %>%
   mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
 alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv") %>%
   mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
-  
-# 必要なデータ
-program <- program %>% dplyr::collect()
-ban1 <- ban1 %>% dplyr::collect()
-sta <- sta %>% dplyr::collect()
 ```
 
 # Dataset overview
@@ -249,7 +244,7 @@ head(difftime)
 
 ```{r eval=FALSE}
 alltime <- program %>% 
-  select(station_code, program_start_time, program_time) %>% 
+  select(station_code, program_date,program_start_time, program_time) %>% 
   dplyr::collect() %>% 
   left_join(realtime, by= c("station_code", "program_start_time","program_time")) %>% 
   left_join(timeshift, by= c("station_code", "program_start_time","program_time")) %>% 
@@ -262,13 +257,13 @@ alltime <- program %>%
       TRUE ~ real_watch + diff_watch
       )
   ) %>% 
-  mutate(program_date_normal = .$program_start_time %>% as.Date(tz = "Asia/Tokyo")) %>% # 標本情報は普通時刻なので, 普通時刻のカラムを作成
-  arrange(program_date_normal,station_code,program_start_time) %>%  
-  left_join(sample_count, by=c("program_date_normal"="sample_date")) %>% 
+  # mutate(program_date_normal = .$program_start_time %>% as.Date(tz = "Asia/Tokyo")) %>% # 標本情報は業界時刻
+  arrange(program_date,station_code,program_start_time) %>%  
+  left_join(sample_count, by=c("program_date" = "sample_date")) %>% 
   mutate(real_watch_rate = real_watch / sample_num,
          shift_watch_rate = shift_watch / sample_num,
          all_watch_rate = all_watch / sample_num) %>% 
-  select(-program_date_normal)
+  select(-program_date)
 ```
 
 ```{r eval=FALSE}
@@ -292,9 +287,9 @@ head(alltime)
 ```
 
 - 有効な値について 
-    - リアルタイム視聴率: 107922
-    - タイムシフト視聴率: 75993
-    - 総合視聴率: 107976
+    - リアルタイム視聴率: 107983
+    - タイムシフト視聴率: 76004
+    - 総合視聴率: 108037
     
 ```{r}
 alltime %>% select(real_watch_rate) %>% na.omit %>% NROW
@@ -334,7 +329,7 @@ alltime %>%
 
 ```{r}
 alltime %>% 
-  left_join(sta,by="station_code") %>% 
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
   ggplot(aes(factor(station_jp), real_watch_rate, colour = factor(station_jp))) +
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   geom_violin(trim=FALSE) + 
@@ -346,7 +341,7 @@ alltime %>%
 
 ```{r}
 alltime %>% 
-  left_join(sta,by="station_code") %>% 
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
   ggplot(aes(factor(station_jp), shift_watch_rate, colour = factor(station_jp))) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
@@ -358,7 +353,7 @@ alltime %>%
 ```{r}
 p1 <-
   alltime %>% 
-  left_join(sta,by="station_code") %>% 
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
   ggplot(aes(factor(station_jp), all_watch_rate, colour = factor(station_jp))) +
   geom_violin(trim=FALSE) + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
@@ -378,7 +373,7 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合
 ```{r}
 p1 <-
   alltime %>% 
-  left_join(sta,by="station_code") %>% 
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
   ggplot(aes(factor(station_jp), all_watch_rate, colour = factor(station_jp))) +
   geom_boxplot() + 
   stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1)) + 
@@ -475,7 +470,7 @@ alltime %>%
 
 ```{r}
 p1 <- alltime %>% 
-  left_join(sta,by="station_code") %>% 
+  left_join(sta %>% dplyr::collect(),by="station_code") %>% 
   ggplot(aes(x=program_start_time, all_watch_rate)) +
     geom_line(aes(color = factor(station_jp))) +
     scale_x_datetime(breaks = date_breaks("month"), labels = date_format("%Y-%m")) +
@@ -509,7 +504,8 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの総合
 p1 <- alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
-                     sin_toku, br_format, final_code),
+                     sin_toku, br_format, final_code) %>% 
+              dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
   ggplot(aes(factor(ban_code1), all_watch_rate, colour = factor(ban_code1))) +
   geom_violin(trim=FALSE) + 
@@ -531,7 +527,8 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの大分
 p1 <- alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
-                     sin_toku, br_format, final_code),
+                     sin_toku, br_format, final_code) %>% 
+              dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
   ggplot(aes(factor(br_format), all_watch_rate, colour = factor(br_format))) +
   geom_violin(trim=FALSE) + 
@@ -552,7 +549,8 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/チャンネルごとの番組
 alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
-                     sin_toku, br_format, final_code),
+                     sin_toku, br_format, final_code) %>% 
+              dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
   ggplot(aes(factor(sin_toku), all_watch_rate, colour = factor(sin_toku))) +
   geom_violin(trim=FALSE) + 
@@ -569,7 +567,8 @@ alltime %>%
 alltime %>% 
   left_join(program %>% 
               select(station_code, program_start_time, ban_code1, ban_code2, ban_code3, 
-                     sin_toku, br_format, final_code),
+                     sin_toku, br_format, final_code) %>% 
+              dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
   ggplot(aes(factor(final_code), all_watch_rate, colour = factor(final_code))) +
   geom_violin(trim=FALSE) + 
