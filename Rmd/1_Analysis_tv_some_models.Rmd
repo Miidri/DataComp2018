@@ -145,19 +145,19 @@ alltime2 %>%
             by="program_code") -> tmp
 tmp1 <- tmp %>% 
   left_join(tmp %>% 
-              filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+              filter(program_start_time < "2018-03-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
               group_by(ban_code1) %>% summarise_at(c("all_watch_rate"),fn2),by = "ban_code1") %>% 
   left_join(tmp %>% 
-              filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+              filter(program_start_time < "2018-03-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
               group_by(Hour) %>% summarise_at(c("all_watch_rate"),fn2),by = "Hour")
 ```
 
 ```{r}
 train_data <- tmp1 %>% 
-  filter(program_start_time < "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+  filter(program_start_time < "2018-03-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
   filter(all_watch_rate %>% is.na() %>% !.)
 test_data <- tmp1 %>% 
-  filter(program_start_time >= "2018-02-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
+  filter(program_start_time >= "2018-03-01 0:00:00" %>% as.Date(tz = "Asia/Tokyo")) %>% 
   filter(all_watch_rate %>% is.na() %>% !.)
 ```
 
@@ -216,8 +216,8 @@ XgboostPred <- function(xgb_params,train_data,test_data){
             print_every_n = 10,
             early_stopping_rounds = 200 )
   # predict
-  pred_train <- predict(xgb_model,train)
-  pred_test <- predict(xgb_model,test)
+  #pred_train <- predict(xgb_model,train)
+  #pred_test <- predict(xgb_model,test)
   # predict rmsle
   pred_train <- expm1(predict(xgb_model,train))
   pred_test <- expm1(predict(xgb_model,test))
@@ -264,7 +264,7 @@ p2 <- data.frame(test_data,pred = pred_test) %>%
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="xgboostによる予測視聴率", x="実際の視聴率", 
-       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466, RMSLE = 0.0054") 
+       title="テスト期間: 2018/3/1 - 2018/4/2, 標本数: 17466, RMSLE = 0.0054") 
 ```
 
 ```{r}
@@ -286,7 +286,7 @@ p1 <- data.frame(test_data,pred = pred_test) %>%
   stat_poly_eq(formula = formula, parse = TRUE, size=12, color = "magenta3") + 
   theme_set(theme_classic(base_size = 18,base_family = "HiraKakuPro-W3")) +
   labs(y ="従来手法による推定視聴率", x="実際の視聴率", 
-       title="テスト期間: 2018/2/1 - 2018/4/1, 標本数: 17466,  RMSLE = 0.0065") 
+       title="テスト期間: 2018/3/1 - 2018/4/2, 標本数: 17466,  RMSLE = 0.0065") 
 ```
 
 ```{r eval=FALSE}

@@ -213,7 +213,8 @@ ggsave(file = "~/Desktop/DataComp2018/image/basic/番組特性ごとの従来手
 ```{r}
 p1 <-alltime2 %>% 
   left_join(program %>% 
-              select(station_code, program_start_time, sin_toku, final_code),
+              select(station_code, program_start_time, sin_toku, final_code) %>% 
+              dplyr::collect(),
             by = c("station_code", "program_start_time")) %>% 
   mutate(sin_toku_ = factor(sin_toku, labels = c("通常", "新番組")),
          final_code_ = factor(final_code, labels = c("通常", "最終回"))) %>% 
