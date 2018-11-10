@@ -75,8 +75,11 @@ source('~/Desktop/DataComp2018/script/sql_connect.R')
 ## load data
 
 ```{r}
-alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv")
-alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv")
+# load csv
+alltime <- read_csv("~/Desktop/DataComp2018/data/watch_rate.csv") %>% 
+  mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
+alltime2 <- read_csv("~/Desktop/DataComp2018/data/watch_rate_pre.csv") %>%
+  mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo"))
 ```
 
 # 従来手法の妥当性について

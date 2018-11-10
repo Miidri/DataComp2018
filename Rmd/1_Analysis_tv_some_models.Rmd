@@ -123,7 +123,8 @@ alltime2 %>%
               select(station_code,program_start_time,ban_code1,
                      ban_code2,ban_code3,sin_toku,br_format,
                      final_code,program_time,program_code,program_name) %>% 
-              dplyr::collect(),
+              dplyr::collect() %>% 
+              mutate(program_start_time = as_datetime(program_start_time, tz="Asia/Tokyo")),
             by = c("station_code","program_start_time")) %>% 
   mutate(Wday = wday(program_start_time) %>% as.factor(),
          #Month = month(program_start_time) %>% as.factor(),

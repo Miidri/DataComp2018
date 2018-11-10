@@ -11,7 +11,7 @@ pick <- function(condition){
 MeanWatchRate <- function(tmp){
   # make ans set
   tmp_ <- tmp %>% 
-    filter(program_start_time >= as.POSIXct("2017-05-01 0:00:00", tz="UTC")) %>% 
+    filter(program_start_time >= as.POSIXct("2017-05-01 0:00:00", tz="Asia/Tokyo")) %>% 
     mutate(pre1 = program_start_time - weeks(1),
            pre2 = program_start_time - weeks(2),
            pre3 = program_start_time - weeks(3),
@@ -49,7 +49,8 @@ MeanWatchRate <- function(tmp){
     }
   }
   stopCluster(cl)
-  # parallel process4
+  # parallel process4 (jは1:(nrow(tmp)-1)??)
+  ########################################## 変
   cl <- makeCluster(4); counter <- 1;
   registerDoParallel(cl); 
   ans4 <- foreach (i = 1:nrow(tmp_), .combine = c) %dopar% {
